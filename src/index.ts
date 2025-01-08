@@ -5,6 +5,7 @@ import { schema } from './schemas';
 
 export interface Env {
   DB: D1Database;
+  KV_CF_JWT_AUTH: KVNamespace;
 }
 
 export interface YogaInitialContext {

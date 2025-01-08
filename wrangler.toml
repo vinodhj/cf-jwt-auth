@@ -10,6 +10,10 @@ compatibility_flags = ["nodejs_compat"]
 [observability]
 enabled = true
 
+[[kv_namespaces]]
+binding = "KV_CF_JWT_AUTH"
+id = "a95d747a937940de926543b47ebba7e4"
+
 [[d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "cf-jwt-auth-db"
