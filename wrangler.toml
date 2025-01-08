@@ -13,5 +13,5 @@ enabled = true
 [[d1_databases]]
 binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "cf-jwt-auth-db"
-database_id = "${DATABASE_ID}"
+database_id = "0263848f-49fe-4957-838e-778fcb8c9ddd"
 migrations_dir = "./db/migrations"
