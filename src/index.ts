@@ -6,12 +6,14 @@ import { schema } from './schemas';
 export interface Env {
   DB: D1Database;
   KV_CF_JWT_AUTH: KVNamespace;
+  ENVIRONMENT: string;
 }
 
 export interface YogaInitialContext {
   datasources: {
     cfJwtAuthDataSource: CfJwtAuthDataSource;
   };
+  environment: string;
 }
 
 export default {
@@ -31,6 +33,7 @@ export default {
           datasources: {
             cfJwtAuthDataSource: new CfJwtAuthDataSource({ db }),
           },
+          environment: env.ENVIRONMENT,
         }),
       });
       return yoga.fetch(request);

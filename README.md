@@ -1,10 +1,11 @@
 # Cloudflare Auth using JWT
 
 This project demonstrates how to implement **JWT-based authentication** in a **Cloudflare Worker**. It covers the following aspects:
+
 - Generating a JWT for user login.
 - Protecting API routes using JWT authentication.
 - Handling unauthorized access.
-  
+
 ## Features
 
 - **User Authentication**: Using JSON Web Tokens (JWT) for user authentication.
