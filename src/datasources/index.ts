@@ -27,9 +27,6 @@ export class CfJwtAuthDataSource {
         })
         .returning()
         .get();
-      if (!result) {
-        throw new GraphQLError('Failed to submit Enquiry');
-      }
       return {
         success: true,
         user: {
@@ -37,7 +34,16 @@ export class CfJwtAuthDataSource {
         },
       };
     } catch (error) {
-      console.log(error);
+      console.log("error", error);
+      if (error instanceof GraphQLError || error instanceof Error) {
+        //to throw GraphQLError/original error
+        throw new GraphQLError(`Failed to sign up ${error.message ? "- "+error.message : "" }`, {
+          extensions: {
+            code: 'INTERNAL_SERVER_ERROR',
+            error: error.message,
+          },
+        });
+      }
       throw new GraphQLError('Failed to sign up', {
         extensions: {
           code: 'INTERNAL_SERVER_ERROR',

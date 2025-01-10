@@ -8,7 +8,7 @@ export enum Role {
 export const user = sqliteTable('user', {
   id: text('id').primaryKey(), // nano id
   name: text('name').notNull(),
-  email: text('email').notNull(),
+  email: text('email').unique().notNull(),
   password: text('password').notNull(),
   role: text('role', { enum: ['ADMIN', 'USER'] })
     .notNull()
