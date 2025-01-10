@@ -26,7 +26,25 @@ export const typeDefs = gql`
 
   type SignUpResponse {
     success: Boolean!
-    user: User
+    user: UserSuccessResponse
+  }
+
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+  
+  type LoginResponse {
+    success: Boolean!
+    token: String
+    user: UserSuccessResponse
+  }
+
+  type UserSuccessResponse {
+    id: ID!
+    name: String!
+    email: String!
+    role: Role!
   }
 
   type Query {
@@ -35,5 +53,6 @@ export const typeDefs = gql`
 
   type Mutation {
     signUp(input: SignUpInput): SignUpResponse!
+    login(input: LoginInput!): LoginResponse!
   }
 `;

@@ -6,34 +6,31 @@ import { schema } from './schemas';
 export interface Env {
   DB: D1Database;
   KV_CF_JWT_AUTH: KVNamespace;
-  ENVIRONMENT: string;
+  JWT_SECRET: string;
 }
 
 export interface YogaInitialContext {
   datasources: {
     cfJwtAuthDataSource: CfJwtAuthDataSource;
   };
-  environment: string;
+  jwtSecret: string;
 }
 
 export default {
   async fetch(request, env, ctx): Promise<Response> {
     const url = new URL(request.url);
     const db = drizzle(env.DB);
-    const datasources = {
-      cfJwtAuthDataSource: new CfJwtAuthDataSource({ db }),
-    };
-
     if (url.pathname === '/graphql') {
       const yoga = createYoga({
         schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
         landingPage: false,
         graphqlEndpoint: '/graphql',
         context: () => ({
+          
           datasources: {
             cfJwtAuthDataSource: new CfJwtAuthDataSource({ db }),
           },
-          environment: env.ENVIRONMENT,
+          jwtSecret: env.JWT_SECRET,
         }),
       });
       return yoga.fetch(request);

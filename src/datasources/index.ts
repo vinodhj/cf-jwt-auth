@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { DrizzleD1Database } from 'drizzle-orm/d1';
-import { SignUpInput } from 'generated';
+import { LoginInput, SignUpInput } from 'generated';
+import { eq,} from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { nanoid } from 'nanoid';
 import { Role, user } from 'db/schema/user';
@@ -45,6 +46,56 @@ export class CfJwtAuthDataSource {
         });
       }
       throw new GraphQLError('Failed to sign up', {
+        extensions: {
+          code: 'INTERNAL_SERVER_ERROR',
+          error,
+        },
+      });
+    }
+  }
+
+  async login(input: LoginInput) {
+    try {
+      const result = await this.db
+        .select()
+        .from(user) 
+        .where(eq(user.email, input.email))
+        .get(); 
+        if (!result) {
+          throw new GraphQLError('User not found', {
+            extensions: {
+              code: 'NOT_FOUND',
+            },
+          });
+        }
+        const isPasswordMatch = await bcrypt.compare(input.password, result.password);
+        if (!isPasswordMatch) {
+          throw new GraphQLError('Invalid password', {
+            extensions: {
+              code: 'UNAUTHORIZED',
+            },
+          });
+        }
+
+        return {
+          success: true,
+          user: {
+            ...result,
+          },
+        };
+    }
+    catch (error) {
+      console.error("error", error);
+      if (error instanceof GraphQLError || error instanceof Error) {
+        //to throw GraphQLError/original error
+        throw new GraphQLError(`Failed to login ${error.message ? "- "+error.message : "" }`, {
+          extensions: {
+            code: error instanceof GraphQLError ? error.extensions.code : 'INTERNAL_SERVER_ERROR',
+            error: error.message,
+          },
+        });
+      }
+      throw new GraphQLError('Failed to login', {
         extensions: {
           code: 'INTERNAL_SERVER_ERROR',
           error,
