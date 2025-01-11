@@ -113,7 +113,7 @@ export class CfJwtAuthDataSource {
     }
   }
 
-  async userByEmail( input: UserByEmailInput) {
+  async userByEmail(input: UserByEmailInput) {
     try {
       return this.db.select().from(user).where(eq(user.email, input.email)).get();
     } catch (error) {

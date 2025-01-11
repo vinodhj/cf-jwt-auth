@@ -18,7 +18,7 @@ export const generateToken = (payload: TokenPayload, secret: string, expiresIn: 
         code: 'INTERNAL_SERVER_ERROR',
         error,
       },
-    })
+    });
   }
 };
 
@@ -26,7 +26,7 @@ export const verifyToken = async (token: string, secret: string, kvNamespace: KV
   try {
     return jwt.verify(token, secret) as TokenPayload;
   } catch (error) {
-    console.error('Error verifying token:', error); 
+    console.error('Error verifying token:', error);
     // Save invalid token log to KVNamespace
     const logKey = `invalid-token:${new Date().toISOString()}`;
     const logValue = JSON.stringify({
@@ -47,6 +47,6 @@ export const verifyToken = async (token: string, secret: string, kvNamespace: KV
         code: 'UNAUTHORIZED',
         error,
       },
-    })
+    });
   }
 };

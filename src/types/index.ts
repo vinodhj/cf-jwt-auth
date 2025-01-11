@@ -33,7 +33,7 @@ export const typeDefs = gql`
     email: String!
     password: String!
   }
-  
+
   type LoginResponse {
     success: Boolean!
     token: String

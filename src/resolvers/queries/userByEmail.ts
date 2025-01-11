@@ -4,7 +4,7 @@ import { GraphQLError } from 'graphql';
 
 export const userByEmail = (
   _: unknown,
- { input }: { input: UserByEmailInput },
+  { input }: { input: UserByEmailInput },
   { datasources, accessToken }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null }
 ) => {
   try {
