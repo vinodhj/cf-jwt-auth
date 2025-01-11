@@ -42,18 +42,18 @@ export type MutationLoginArgs = {
 
 
 export type MutationSignUpArgs = {
-  input?: InputMaybe<SignUpInput>;
+  input: SignUpInput;
 };
 
 export type Query = {
   __typename?: 'Query';
-  user?: Maybe<User>;
+  userByEmail?: Maybe<UserResponse>;
   users?: Maybe<Array<Maybe<UserResponse>>>;
 };
 
 
-export type QueryUserArgs = {
-  id: Scalars['ID']['input'];
+export type QueryUserByEmailArgs = {
+  input: UserByEmailInput;
 };
 
 export enum Role {
@@ -82,6 +82,10 @@ export type User = {
   password: Scalars['String']['output'];
   role: Role;
   updated_at: Scalars['DateTime']['output'];
+};
+
+export type UserByEmailInput = {
+  email: Scalars['String']['input'];
 };
 
 export type UserResponse = {
@@ -185,6 +189,7 @@ export type ResolversTypes = {
   SignUpResponse: ResolverTypeWrapper<SignUpResponse>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   User: ResolverTypeWrapper<User>;
+  UserByEmailInput: UserByEmailInput;
   UserResponse: ResolverTypeWrapper<UserResponse>;
   UserSuccessResponse: ResolverTypeWrapper<UserSuccessResponse>;
 };
@@ -202,6 +207,7 @@ export type ResolversParentTypes = {
   SignUpResponse: SignUpResponse;
   String: Scalars['String']['output'];
   User: User;
+  UserByEmailInput: UserByEmailInput;
   UserResponse: UserResponse;
   UserSuccessResponse: UserSuccessResponse;
 };
@@ -219,11 +225,11 @@ export type LoginResponseResolvers<ContextType = any, ParentType extends Resolve
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   login?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'input'>>;
-  signUp?: Resolver<ResolversTypes['SignUpResponse'], ParentType, ContextType, Partial<MutationSignUpArgs>>;
+  signUp?: Resolver<ResolversTypes['SignUpResponse'], ParentType, ContextType, RequireFields<MutationSignUpArgs, 'input'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
+  userByEmail?: Resolver<Maybe<ResolversTypes['UserResponse']>, ParentType, ContextType, RequireFields<QueryUserByEmailArgs, 'input'>>;
   users?: Resolver<Maybe<Array<Maybe<ResolversTypes['UserResponse']>>>, ParentType, ContextType>;
 };
 

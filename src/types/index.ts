@@ -56,13 +56,17 @@ export const typeDefs = gql`
     updated_at: DateTime!
   }
 
+  input UserByEmailInput {
+    email: String!
+  }
+
   type Query {
-    user(id: ID!): UserResponse
+    userByEmail(input: UserByEmailInput!): UserResponse
     users: [UserResponse]
   }
 
   type Mutation {
-    signUp(input: SignUpInput): SignUpResponse!
+    signUp(input: SignUpInput!): SignUpResponse!
     login(input: LoginInput!): LoginResponse!
   }
 `;
