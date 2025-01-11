@@ -47,8 +47,18 @@ export const typeDefs = gql`
     role: Role!
   }
 
+  type UserResponse {
+    id: ID!
+    name: String!
+    email: String!
+    role: Role!
+    created_at: DateTime!
+    updated_at: DateTime!
+  }
+
   type Query {
-    user(id: ID!): User
+    user(id: ID!): UserResponse
+    users: [UserResponse]
   }
 
   type Mutation {

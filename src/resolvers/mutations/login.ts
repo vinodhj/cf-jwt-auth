@@ -18,10 +18,6 @@ export const login = async (
   
       // Generate JWT token
       const token = generateToken({ email: result.user.email, name: result.user.name }, jwtSecret, '5m');
-  
-      // Verify JWT token
-      //const verifiedUser = verifyToken(token, jwtSecret);
-  
       return {
         token,
         ...result,

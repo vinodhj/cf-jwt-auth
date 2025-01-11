@@ -103,4 +103,18 @@ export class CfJwtAuthDataSource {
       });
     }
   }
+
+  async users() {
+    try {
+      return this.db.select().from(user).execute();
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      throw new GraphQLError('Failed to get users', {
+        extensions: {
+          code: 'INTERNAL_SERVER_ERROR',
+          error,
+        },
+      });
+    }
+  }
 }
