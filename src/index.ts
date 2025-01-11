@@ -39,6 +39,10 @@ export default {
             } catch (error) {
               accessToken = null;
               console.log(error);
+              if (error instanceof GraphQLError || error instanceof Error) {
+                // Re-throw GraphQL-specific errors
+                throw error;
+              }
               throw new GraphQLError('Invalid token', {
                 extensions: {
                   code: 'UNAUTHORIZED',
