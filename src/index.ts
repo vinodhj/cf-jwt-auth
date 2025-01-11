@@ -35,47 +35,47 @@ const validateProjectToken = (projectToken: string | null, expectedToken: string
   }
 };
 
-        export default {
-          async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-            const url = new URL(request.url);
-            const db = drizzle(env.DB);
-            if (url.pathname === '/graphql') {
-              const yoga = createYoga({
-                schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
-                landingPage: false,
-                graphqlEndpoint: GRAPHQL_PATH,
-                context: async () => {
-                  const projectToken = request.headers.get('X-Project-Token') ?? request.headers.get('x-project-token');
-                  const authorization = request.headers.get('Authorization') ?? request.headers.get('authorization');
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const url = new URL(request.url);
+    const db = drizzle(env.DB);
+    if (url.pathname === '/graphql') {
+      const yoga = createYoga({
+        schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
+        landingPage: false,
+        graphqlEndpoint: GRAPHQL_PATH,
+        context: async () => {
+          const projectToken = request.headers.get('X-Project-Token') ?? request.headers.get('x-project-token');
+          const authorization = request.headers.get('Authorization') ?? request.headers.get('authorization');
 
-                  validateProjectToken(projectToken, env.PROJECT_TOKEN);
+          validateProjectToken(projectToken, env.PROJECT_TOKEN);
 
-                  const accessToken = getAccessToken(authorization);
-                  if (accessToken) {
-                    try {
-                      await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
-                    } catch (error) {
-                      const isGraphQLError = error instanceof GraphQLError;
-                      throw new GraphQLError(isGraphQLError ? error.message : 'Invalid token', {
-                        extensions: {
-                          code: 'UNAUTHORIZED',
-                          ...(isGraphQLError ? {} : { error }),
-                        },
-                      });
-                    }
-                  }
-
-                  return {
-                    datasources: {
-                      cfJwtAuthDataSource: new CfJwtAuthDataSource({ db }),
-                    },
-                    jwtSecret: env.JWT_SECRET,
-                    accessToken,
-                  };
+          const accessToken = getAccessToken(authorization);
+          if (accessToken) {
+            try {
+              await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
+            } catch (error) {
+              const isGraphQLError = error instanceof GraphQLError;
+              throw new GraphQLError(isGraphQLError ? error.message : 'Invalid token', {
+                extensions: {
+                  code: 'UNAUTHORIZED',
+                  ...(isGraphQLError ? {} : { error }),
                 },
               });
-              return yoga.fetch(request);
             }
-            return new Response('Not found', { status: 404 });
-          },
-        } as ExportedHandler<Env>;
+          }
+
+          return {
+            datasources: {
+              cfJwtAuthDataSource: new CfJwtAuthDataSource({ db }),
+            },
+            jwtSecret: env.JWT_SECRET,
+            accessToken,
+          };
+        },
+      });
+      return yoga.fetch(request);
+    }
+    return new Response('Not found', { status: 404 });
+  },
+} as ExportedHandler<Env>;
