@@ -10,7 +10,7 @@ This project demonstrates how to implement **JWT-based authentication** in a **C
 
 - **User Authentication**: Using JSON Web Tokens (JWT) for user authentication.
 - **Access Control**: Secure endpoints that require a valid JWT to access.
-- **Authorization**: Protect specific routes (e.g., `protectedData`) using JWT.
+- **Authorization**: Protect specific routes using JWT.
 
 ## Prerequisites
 
