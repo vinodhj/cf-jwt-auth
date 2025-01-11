@@ -7,3 +7,5 @@ bun run format
 
 # Automatically add any changes made by formatting and linting
 git add .
+
+git status
