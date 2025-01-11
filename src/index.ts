@@ -9,6 +9,7 @@ export interface Env {
   DB: D1Database;
   KV_CF_JWT_AUTH: KVNamespace;
   JWT_SECRET: string;
+  PROJECT_TOKEN: string;
 }
 
 export interface YogaInitialContext {
@@ -29,16 +30,24 @@ export default {
         landingPage: false,
         graphqlEndpoint: '/graphql',
         context: async () => {
-          const authorization = request.headers.get('Authorization') || request.headers.get('authorization');
+          const projectToken = request.headers.get('X-Project-Token') ?? request.headers.get('x-project-token');
+          const authorization = request.headers.get('Authorization') ?? request.headers.get('authorization');
+
+          if (!projectToken || projectToken !== env.PROJECT_TOKEN) {
+            throw new GraphQLError('Missing or invalid project token', {
+              extensions: {
+                code: 'UNAUTHORIZED',
+              },
+            });
+          }
+
           let accessToken: string | null = null;
           if (authorization) {
-            // check for auth
             accessToken = authorization.replace(/bearer /i, '').replace(/Bearer /i, '');
             try {
               await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
             } catch (error) {
               accessToken = null;
-              console.log(error);
               if (error instanceof GraphQLError || error instanceof Error) {
                 // Re-throw GraphQL-specific errors
                 throw error;
@@ -51,6 +60,7 @@ export default {
               });
             }
           }
+
           return {
             datasources: {
               cfJwtAuthDataSource: new CfJwtAuthDataSource({ db }),
