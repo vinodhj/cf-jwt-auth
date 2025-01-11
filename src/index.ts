@@ -36,7 +36,7 @@ const validateProjectToken = (projectToken: string | null, expectedToken: string
 };
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const db = drizzle(env.DB);
     if (url.pathname === '/graphql') {
