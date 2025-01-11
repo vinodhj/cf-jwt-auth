@@ -20,42 +20,47 @@ export interface YogaInitialContext {
   accessToken: string | null;
 }
 
+const GRAPHQL_PATH = '/graphql';
+
+const getAccessToken = (authorizationHeader: string | null): string | null => {
+  if (!authorizationHeader) return null;
+  return authorizationHeader.replace(/bearer\s+/i, '').trim();
+};
+
+const validateProjectToken = (projectToken: string | null, expectedToken: string): void => {
+  if (!projectToken || projectToken !== expectedToken) {
+    throw new GraphQLError('Missing or invalid project token', {
+      extensions: { code: 'UNAUTHORIZED' },
+    });
+  }
+};
+
+
 export default {
-  async fetch(request, env, ctx): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const db = drizzle(env.DB);
     if (url.pathname === '/graphql') {
       const yoga = createYoga({
         schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
         landingPage: false,
-        graphqlEndpoint: '/graphql',
+        graphqlEndpoint: GRAPHQL_PATH,
         context: async () => {
           const projectToken = request.headers.get('X-Project-Token') ?? request.headers.get('x-project-token');
           const authorization = request.headers.get('Authorization') ?? request.headers.get('authorization');
 
-          if (!projectToken || projectToken !== env.PROJECT_TOKEN) {
-            throw new GraphQLError('Missing or invalid project token', {
-              extensions: {
-                code: 'UNAUTHORIZED',
-              },
-            });
-          }
+          validateProjectToken(projectToken, env.PROJECT_TOKEN);
 
-          let accessToken: string | null = null;
-          if (authorization) {
-            accessToken = authorization.replace(/bearer /i, '').replace(/Bearer /i, '');
+          const accessToken = getAccessToken(authorization);
+          if (accessToken) {
             try {
               await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
-            } catch (error) {
-              accessToken = null;
-              if (error instanceof GraphQLError || error instanceof Error) {
-                // Re-throw GraphQL-specific errors
-                throw error;
-              }
-              throw new GraphQLError('Invalid token', {
+            } catch (error)  {
+              const isGraphQLError = error instanceof GraphQLError;
+              throw new GraphQLError(isGraphQLError ? error.message : 'Invalid token', {
                 extensions: {
                   code: 'UNAUTHORIZED',
-                  error,
+                  ...(isGraphQLError ? {} : { error }),
                 },
               });
             }
