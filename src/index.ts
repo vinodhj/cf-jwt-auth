@@ -51,10 +51,10 @@ export default {
 
           validateProjectToken(projectToken, env.PROJECT_TOKEN);
 
-          const accessToken = getAccessToken(authorization);
+  const accessToken = getAccessToken(authorization);
           if (accessToken) {
             try {
-              await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
+await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
             } catch (error)  {
               const isGraphQLError = error instanceof GraphQLError;
               throw new GraphQLError(isGraphQLError ? error.message : 'Invalid token', {
