@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname "$0")/_/husky.sh"
 #. "$(dirname "$0")/h"
+# ./.husky/pre-commit
 
 # Run format and lint
 bun run format
@@ -9,4 +10,4 @@ bun run format
 # Automatically add any changes made by formatting and linting
 git add .
 
-git status
+# git status
