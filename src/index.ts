@@ -3,6 +3,7 @@ import { YogaSchemaDefinition, createYoga } from 'graphql-yoga';
 import { drizzle } from 'drizzle-orm/d1';
 import { schema } from './schemas';
 import { verifyToken } from './resolvers/mutations/helper/jwtUtils';
+import { GraphQLError } from 'graphql';
 
 export interface Env {
   DB: D1Database;
@@ -27,13 +28,24 @@ export default {
         schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
         landingPage: false,
         graphqlEndpoint: '/graphql',
-        context: () => {
+        context: async () => {
           const authorization = request.headers.get('Authorization') || request.headers.get('authorization');
           let accessToken: string | null = null;
           if (authorization) {
             // check for auth
             accessToken = authorization.replace(/bearer /i, '').replace(/Bearer /i, '');
-            verifyToken(accessToken, env.JWT_SECRET);
+            try {
+              await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
+            } catch (error) {
+              accessToken = null;
+              console.log(error);
+              throw new GraphQLError('Invalid token', {
+                extensions: {
+                  code: 'UNAUTHORIZED',
+                  error,
+                },
+              });
+            }
           }
           return {
             datasources: {
