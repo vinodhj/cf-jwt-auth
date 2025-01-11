@@ -22,7 +22,6 @@ export default {
   async fetch(request, env, ctx): Promise<Response> {
     const url = new URL(request.url);
     const db = drizzle(env.DB);
-    //const authorization = event.headers.Authorization || event.headers.authorization;
     if (url.pathname === '/graphql') {
       const yoga = createYoga({
         schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
