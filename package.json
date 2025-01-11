@@ -14,7 +14,8 @@
     "generate": "graphql-codegen",
     "migration-list": "wrangler d1 migrations list DB",
     "migration-apply-production": "wrangler d1 migrations apply DB --remote",
-    "format": "prettier --write \"**/*.{ts,tsx,md,json}\" --no-error-on-unmatched-pattern"
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\" --no-error-on-unmatched-pattern",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.5.2",
@@ -35,6 +36,7 @@
     "gql": "^1.1.2",
     "graphql": "^16.10.0",
     "graphql-yoga": "^5.10.9",
+    "husky": "^9.1.7",
     "jsonwebtoken": "^9.0.2",
     "nanoid": "^5.0.9"
   }
