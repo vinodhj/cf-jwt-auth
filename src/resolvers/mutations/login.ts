@@ -17,7 +17,7 @@ export const login = async (
     const result = await datasources.cfJwtAuthDataSource.login(input);
 
     // Generate JWT token
-    const token = generateToken({ email: result.user.email, name: result.user.name }, jwtSecret, '5m');
+    const token = generateToken({ email: result.user.email, name: result.user.name, role: result.user.role }, jwtSecret, '5m');
     return {
       token,
       ...result,

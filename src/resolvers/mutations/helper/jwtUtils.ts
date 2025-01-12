@@ -1,9 +1,11 @@
+import { Role } from 'db/schema/user';
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
 
 export interface TokenPayload {
   email: string;
   name: string;
+  role: Role;
   iat?: number;
   exp?: number;
 }

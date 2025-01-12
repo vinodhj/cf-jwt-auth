@@ -22,6 +22,7 @@ export const typeDefs = gql`
     name: String!
     email: String!
     password: String!
+    role: Role
   }
 
   type SignUpResponse {
@@ -60,8 +61,20 @@ export const typeDefs = gql`
     email: String!
   }
 
+  input UserByFieldInput {
+    field: CoulmnName!
+    value: String!
+  }
+
+  enum CoulmnName {
+    id
+    name
+    email
+  }
+
   type Query {
     userByEmail(input: UserByEmailInput!): UserResponse
+    userByfield(input: UserByFieldInput): UserResponse
     users: [UserResponse]
   }
 

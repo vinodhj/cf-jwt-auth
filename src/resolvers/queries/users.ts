@@ -1,19 +1,15 @@
 import { CfJwtAuthDataSource } from '@src/datasources';
+import { Role } from 'db/schema/user';
 import { GraphQLError } from 'graphql';
+import { validateUserAccess } from '../mutations/helper/userAccessValidators';
 
 export const users = (
   _: unknown,
   __: unknown,
-  { datasources, accessToken }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null }
+  { datasources, accessToken, role }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; role: Role }
 ) => {
   try {
-    if (!accessToken) {
-      throw new GraphQLError('Unauthorized', {
-        extensions: {
-          code: 'UNAUTHORIZED',
-        },
-      });
-    }
+    validateUserAccess(accessToken, role);
     return datasources.cfJwtAuthDataSource.users();
   } catch (error) {
     if (error instanceof GraphQLError) {

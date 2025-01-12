@@ -10,13 +10,16 @@ import bcrypt from 'bcryptjs';
 
 export class CfJwtAuthDataSource {
   private db: DrizzleD1Database;
-  constructor({ db }: { db: DrizzleD1Database }) {
+  private role: Role;
+  constructor({ db, role }: { db: DrizzleD1Database; role: Role }) {
     this.db = db;
+    this.role = role;
   }
 
   async signUp(input: SignUpInput) {
     try {
       const hashedPassword = await bcrypt.hash(input.password, 10);
+
       const result = await this.db
         .insert(user)
         .values({
@@ -24,7 +27,7 @@ export class CfJwtAuthDataSource {
           name: input.name,
           email: input.email,
           password: hashedPassword,
-          role: Role.USER,
+          role: input.role === 'ADMIN' ? Role.ADMIN : Role.USER,
         })
         .returning()
         .get();

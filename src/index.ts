@@ -4,6 +4,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import { schema } from './schemas';
 import { verifyToken } from './resolvers/mutations/helper/jwtUtils';
 import { GraphQLError } from 'graphql';
+import { Role } from 'db/schema/user';
 
 export interface Env {
   DB: D1Database;
@@ -18,6 +19,7 @@ export interface YogaInitialContext {
   };
   jwtSecret: string;
   accessToken: string | null;
+  role: Role;
 }
 
 const GRAPHQL_PATH = '/graphql';
@@ -28,6 +30,7 @@ const getAccessToken = (authorizationHeader: string | null): string | null => {
 };
 
 const validateProjectToken = (projectToken: string | null, expectedToken: string): void => {
+  console.log(projectToken, expectedToken);
   if (!projectToken || projectToken !== expectedToken) {
     throw new GraphQLError('Missing or invalid project token', {
       extensions: { code: 'UNAUTHORIZED' },
@@ -51,9 +54,11 @@ export default {
           validateProjectToken(projectToken, env.PROJECT_TOKEN);
 
           const accessToken = getAccessToken(authorization);
+          let role = Role.USER;
           if (accessToken) {
             try {
-              await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
+              const jwtVerifyToken = await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
+              role = jwtVerifyToken.role;
             } catch (error) {
               const isGraphQLError = error instanceof GraphQLError;
               throw new GraphQLError(isGraphQLError ? error.message : 'Invalid token', {
@@ -67,10 +72,11 @@ export default {
 
           return {
             datasources: {
-              cfJwtAuthDataSource: new CfJwtAuthDataSource({ db }),
+              cfJwtAuthDataSource: new CfJwtAuthDataSource({ db, role }),
             },
             jwtSecret: env.JWT_SECRET,
             accessToken,
+            role,
           };
         },
       });

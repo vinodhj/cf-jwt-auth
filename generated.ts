@@ -17,6 +17,12 @@ export type Scalars = {
   DateTime: { input: any; output: any };
 };
 
+export enum CoulmnName {
+  Email = 'email',
+  Id = 'id',
+  Name = 'name',
+}
+
 export type LoginInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -46,11 +52,16 @@ export type MutationSignUpArgs = {
 export type Query = {
   __typename?: 'Query';
   userByEmail?: Maybe<UserResponse>;
+  userByfield?: Maybe<UserResponse>;
   users?: Maybe<Array<Maybe<UserResponse>>>;
 };
 
 export type QueryUserByEmailArgs = {
   input: UserByEmailInput;
+};
+
+export type QueryUserByfieldArgs = {
+  input?: InputMaybe<UserByFieldInput>;
 };
 
 export enum Role {
@@ -62,6 +73,7 @@ export type SignUpInput = {
   email: Scalars['String']['input'];
   name: Scalars['String']['input'];
   password: Scalars['String']['input'];
+  role?: InputMaybe<Role>;
 };
 
 export type SignUpResponse = {
@@ -83,6 +95,11 @@ export type User = {
 
 export type UserByEmailInput = {
   email: Scalars['String']['input'];
+};
+
+export type UserByFieldInput = {
+  field: CoulmnName;
+  value: Scalars['String']['input'];
 };
 
 export type UserResponse = {
@@ -172,6 +189,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  CoulmnName: CoulmnName;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   LoginInput: LoginInput;
@@ -184,6 +202,7 @@ export type ResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   User: ResolverTypeWrapper<User>;
   UserByEmailInput: UserByEmailInput;
+  UserByFieldInput: UserByFieldInput;
   UserResponse: ResolverTypeWrapper<UserResponse>;
   UserSuccessResponse: ResolverTypeWrapper<UserSuccessResponse>;
 };
@@ -202,6 +221,7 @@ export type ResolversParentTypes = {
   String: Scalars['String']['output'];
   User: User;
   UserByEmailInput: UserByEmailInput;
+  UserByFieldInput: UserByFieldInput;
   UserResponse: UserResponse;
   UserSuccessResponse: UserSuccessResponse;
 };
@@ -227,6 +247,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   userByEmail?: Resolver<Maybe<ResolversTypes['UserResponse']>, ParentType, ContextType, RequireFields<QueryUserByEmailArgs, 'input'>>;
+  userByfield?: Resolver<Maybe<ResolversTypes['UserResponse']>, ParentType, ContextType, Partial<QueryUserByfieldArgs>>;
   users?: Resolver<Maybe<Array<Maybe<ResolversTypes['UserResponse']>>>, ParentType, ContextType>;
 };
 
