@@ -31,10 +31,11 @@ export class CfJwtAuthDataSource {
         })
         .returning()
         .get();
+      const { password, ...userWithoutPassword } = result;
       return {
         success: true,
         user: {
-          ...result,
+          ...userWithoutPassword,
         },
       };
     } catch (error) {
@@ -48,7 +49,7 @@ export class CfJwtAuthDataSource {
           },
         });
       }
-      throw new GraphQLError('Failed to sign up', {
+      throw new GraphQLError('Failed to sign up due to an unexpected error', {
         extensions: {
           code: 'INTERNAL_SERVER_ERROR',
           error,
@@ -76,10 +77,12 @@ export class CfJwtAuthDataSource {
         });
       }
 
+      const { password, ...userWithoutPassword } = result;
+
       return {
         success: true,
         user: {
-          ...result,
+          ...userWithoutPassword,
         },
       };
     } catch (error) {
@@ -93,7 +96,7 @@ export class CfJwtAuthDataSource {
           },
         });
       }
-      throw new GraphQLError('Failed to login', {
+      throw new GraphQLError('Failed to login due to an unexpected error', {
         extensions: {
           code: 'INTERNAL_SERVER_ERROR',
           error,
