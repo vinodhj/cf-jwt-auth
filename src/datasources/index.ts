@@ -9,8 +9,8 @@ import { Role, user } from 'db/schema/user';
 import bcrypt from 'bcryptjs';
 
 export class CfJwtAuthDataSource {
-  private db: DrizzleD1Database;
-  private role: Role;
+  private readonly db: DrizzleD1Database;
+  private readonly role: Role;
   constructor({ db, role }: { db: DrizzleD1Database; role: Role }) {
     this.db = db;
     this.role = role;
