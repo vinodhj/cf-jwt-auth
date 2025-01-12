@@ -70,11 +70,12 @@ export const typeDefs = gql`
     id
     name
     email
+    role
   }
 
   type Query {
     userByEmail(input: UserByEmailInput!): UserResponse
-    userByfield(input: UserByFieldInput): UserResponse
+    userByfield(input: UserByFieldInput): [UserResponse]
     users: [UserResponse]
   }
 

@@ -21,6 +21,7 @@ export enum CoulmnName {
   Email = 'email',
   Id = 'id',
   Name = 'name',
+  Role = 'role',
 }
 
 export type LoginInput = {
@@ -52,7 +53,7 @@ export type MutationSignUpArgs = {
 export type Query = {
   __typename?: 'Query';
   userByEmail?: Maybe<UserResponse>;
-  userByfield?: Maybe<UserResponse>;
+  userByfield?: Maybe<Array<Maybe<UserResponse>>>;
   users?: Maybe<Array<Maybe<UserResponse>>>;
 };
 
@@ -247,7 +248,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   userByEmail?: Resolver<Maybe<ResolversTypes['UserResponse']>, ParentType, ContextType, RequireFields<QueryUserByEmailArgs, 'input'>>;
-  userByfield?: Resolver<Maybe<ResolversTypes['UserResponse']>, ParentType, ContextType, Partial<QueryUserByfieldArgs>>;
+  userByfield?: Resolver<Maybe<Array<Maybe<ResolversTypes['UserResponse']>>>, ParentType, ContextType, Partial<QueryUserByfieldArgs>>;
   users?: Resolver<Maybe<Array<Maybe<ResolversTypes['UserResponse']>>>, ParentType, ContextType>;
 };
 

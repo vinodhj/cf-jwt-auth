@@ -30,7 +30,6 @@ const getAccessToken = (authorizationHeader: string | null): string | null => {
 };
 
 const validateProjectToken = (projectToken: string | null, expectedToken: string): void => {
-  console.log(projectToken, expectedToken);
   if (!projectToken || projectToken !== expectedToken) {
     throw new GraphQLError('Missing or invalid project token', {
       extensions: { code: 'UNAUTHORIZED' },

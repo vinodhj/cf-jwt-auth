@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { DrizzleD1Database } from 'drizzle-orm/d1';
-import { LoginInput, SignUpInput, UserByEmailInput } from 'generated';
-import { eq } from 'drizzle-orm';
+import { LoginInput, SignUpInput, UserByEmailInput, UserByFieldInput } from 'generated';
+import { eq, like } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { nanoid } from 'nanoid';
 import { Role, user } from 'db/schema/user';
@@ -119,6 +119,23 @@ export class CfJwtAuthDataSource {
   async userByEmail(input: UserByEmailInput) {
     try {
       return this.db.select().from(user).where(eq(user.email, input.email)).get();
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      throw new GraphQLError('Failed to get user', {
+        extensions: {
+          code: 'INTERNAL_SERVER_ERROR',
+          error,
+        },
+      });
+    }
+  }
+
+  async userByfield(input: UserByFieldInput) {
+    try {
+      if (input.field === 'name') {
+        return this.db.select().from(user).where(like(user.name, input.value)).execute();
+      }
+      return this.db.select().from(user).where(eq(user[input.field], input.value)).execute();
     } catch (error) {
       console.error('Unexpected error:', error);
       throw new GraphQLError('Failed to get user', {
