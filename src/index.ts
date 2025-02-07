@@ -5,6 +5,7 @@ import { schema } from './schemas';
 import { verifyToken } from './resolvers/mutations/helper/jwtUtils';
 import { GraphQLError } from 'graphql';
 import { Role } from 'db/schema/user';
+import { addCORSHeaders } from './cors-headers';
 
 export interface Env {
   DB: D1Database;
@@ -41,6 +42,20 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const db = drizzle(env.DB);
+
+    // ✅ Handle CORS Preflight Requests (OPTIONS)
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+          'Access-Control-Allow-Headers': 'Content-Type, X-Project-Token, Authorization',
+          'Access-Control-Allow-Credentials': 'true',
+        },
+      });
+    }
+
     if (url.pathname === '/graphql') {
       const yoga = createYoga({
         schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
@@ -85,7 +100,9 @@ export default {
           };
         },
       });
-      return yoga.fetch(request);
+      // ✅ Ensure CORS Headers Are Set on the Response
+      const response = await yoga.fetch(request);
+      return addCORSHeaders(response);
     }
     return new Response('Not found', { status: 404 });
   },
