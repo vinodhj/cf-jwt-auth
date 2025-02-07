@@ -3,10 +3,6 @@
  *
  *
  */
-// export const addCORSHeaders = (): HeadersInit => ({
-//   'Access-Control-Allow-Origin': '*',
-//   'Content-Type': 'application/json',
-// });
 
 export const addCORSHeaders = (response: Response): Response => {
   const newHeaders = new Headers(response.headers);
