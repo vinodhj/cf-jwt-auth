@@ -44,6 +44,7 @@ export default {
     if (url.pathname === '/graphql') {
       const yoga = createYoga({
         schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
+        cors: { origin: '*' },
         landingPage: false,
         graphqlEndpoint: GRAPHQL_PATH,
         context: async () => {
