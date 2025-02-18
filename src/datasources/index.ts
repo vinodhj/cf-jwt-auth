@@ -158,6 +158,7 @@ export class CfJwtAuthDataSource {
           name: input.name,
           email: input.email,
           role: input.role === 'ADMIN' ? Role.ADMIN : Role.USER,
+          updated_at: new Date(),
         })
         .where(eq(user.id, input.id))
         .returning()
