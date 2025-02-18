@@ -62,11 +62,11 @@ export const typeDefs = gql`
   }
 
   input UserByFieldInput {
-    field: CoulmnName!
+    field: ColumnName!
     value: String!
   }
 
-  enum CoulmnName {
+  enum ColumnName {
     id
     name
     email

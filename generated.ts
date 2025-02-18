@@ -17,7 +17,7 @@ export type Scalars = {
   DateTime: { input: any; output: any };
 };
 
-export enum CoulmnName {
+export enum ColumnName {
   Email = 'email',
   Id = 'id',
   Name = 'name',
@@ -99,7 +99,7 @@ export type UserByEmailInput = {
 };
 
 export type UserByFieldInput = {
-  field: CoulmnName;
+  field: ColumnName;
   value: Scalars['String']['input'];
 };
 
@@ -190,7 +190,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  CoulmnName: CoulmnName;
+  ColumnName: ColumnName;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   LoginInput: LoginInput;
