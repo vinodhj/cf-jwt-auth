@@ -24,6 +24,10 @@ export enum ColumnName {
   Role = 'role',
 }
 
+export type DeleteUserInput = {
+  id: Scalars['ID']['input'];
+};
+
 export type LoginInput = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -38,8 +42,13 @@ export type LoginResponse = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  deleteUser: Scalars['Boolean']['output'];
   login: LoginResponse;
   signUp: SignUpResponse;
+};
+
+export type MutationDeleteUserArgs = {
+  input: DeleteUserInput;
 };
 
 export type MutationLoginArgs = {
@@ -192,6 +201,7 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ColumnName: ColumnName;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
+  DeleteUserInput: DeleteUserInput;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   LoginInput: LoginInput;
   LoginResponse: ResolverTypeWrapper<LoginResponse>;
@@ -212,6 +222,7 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   DateTime: Scalars['DateTime']['output'];
+  DeleteUserInput: DeleteUserInput;
   ID: Scalars['ID']['output'];
   LoginInput: LoginInput;
   LoginResponse: LoginResponse;
@@ -242,6 +253,7 @@ export type LoginResponseResolvers<
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  deleteUser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'input'>>;
   login?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'input'>>;
   signUp?: Resolver<ResolversTypes['SignUpResponse'], ParentType, ContextType, RequireFields<MutationSignUpArgs, 'input'>>;
 };

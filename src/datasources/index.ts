@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { DrizzleD1Database } from 'drizzle-orm/d1';
-import { LoginInput, SignUpInput, UserByEmailInput, UserByFieldInput } from 'generated';
+import { DeleteUserInput, LoginInput, SignUpInput, UserByEmailInput, UserByFieldInput } from 'generated';
 import { eq, like } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { nanoid } from 'nanoid';
@@ -142,6 +142,31 @@ export class CfJwtAuthDataSource {
     } catch (error) {
       console.error('Unexpected error:', error);
       throw new GraphQLError('Failed to get user', {
+        extensions: {
+          code: 'INTERNAL_SERVER_ERROR',
+          error,
+        },
+      });
+    }
+  }
+
+  async deleteUser(input: DeleteUserInput) {
+    try {
+      const deleted = await this.db.delete(user).where(eq(user.id, input.id)).execute();
+      if (deleted && deleted.success) {
+        if (deleted.meta.changed_db) {
+          return true;
+        } else {
+          console.warn(`User not deleted. Changes: ${deleted.meta.changes}`);
+          return false;
+        }
+      } else {
+        console.error('Delete operation failed:', deleted);
+        return false;
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      throw new GraphQLError('Failed to delete user', {
         extensions: {
           code: 'INTERNAL_SERVER_ERROR',
           error,

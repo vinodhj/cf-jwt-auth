@@ -66,6 +66,10 @@ export const typeDefs = gql`
     value: String!
   }
 
+  input DeleteUserInput {
+    id: ID!
+  }
+
   enum ColumnName {
     id
     name
@@ -82,5 +86,6 @@ export const typeDefs = gql`
   type Mutation {
     signUp(input: SignUpInput!): SignUpResponse!
     login(input: LoginInput!): LoginResponse!
+    deleteUser(input: DeleteUserInput!): Boolean!
   }
 `;
