@@ -70,6 +70,18 @@ export const typeDefs = gql`
     id: ID!
   }
 
+  input EditUserInput {
+    id: ID!
+    name: String!
+    email: String!
+    role: Role!
+  }
+
+  type EditUserResponse {
+    success: Boolean!
+    user: UserSuccessResponse
+  }
+
   enum ColumnName {
     id
     name
@@ -86,6 +98,7 @@ export const typeDefs = gql`
   type Mutation {
     signUp(input: SignUpInput!): SignUpResponse!
     login(input: LoginInput!): LoginResponse!
+    editUser(input: EditUserInput!): EditUserResponse!
     deleteUser(input: DeleteUserInput!): Boolean!
   }
 `;
