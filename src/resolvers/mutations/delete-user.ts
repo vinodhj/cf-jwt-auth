@@ -16,7 +16,7 @@ export const deleteUser = async (
       throw error;
     }
     console.error('Unexpected error:', error);
-    throw new GraphQLError('Failed to sign up', {
+    throw new GraphQLError('Failed to delete user', {
       extensions: {
         code: 'INTERNAL_SERVER_ERROR',
         error,

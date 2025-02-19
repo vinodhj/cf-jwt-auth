@@ -181,57 +181,7 @@ export class CfJwtAuthDataSource {
       };
     } catch (error) {
       console.error('Unexpected error:', error);
-      throw new GraphQLError('Failed to delete user', {
-        extensions: {
-          code: 'INTERNAL_SERVER_ERROR',
-          error,
-        },
-      });
-    }
-  }
-
-  async changePassword(input: ChangePasswordInput) {
-    try {
-      // validate current password
-      const result_user = await this.db.select().from(user).where(eq(user.id, input.id)).get();
-      if (!result_user) {
-        throw new GraphQLError('User not found', {
-          extensions: {
-            code: 'NOT_FOUND',
-          },
-        });
-      }
-      const isPasswordMatch = await bcrypt.compare(input.current_password, result_user.password);
-      if (!isPasswordMatch) {
-        throw new GraphQLError('Invalid current password', {
-          extensions: {
-            code: 'UNAUTHORIZED',
-          },
-        });
-      }
-
-      // change password
-      const hashedNewPassword = await bcrypt.hash(input.new_password, 10);
-      const result = await this.db
-        .update(user)
-        .set({
-          password: hashedNewPassword,
-          updated_at: new Date(),
-        })
-        .where(and(eq(user.id, input.id)))
-        .execute();
-
-      if (result && result.success) {
-        if (result.meta.changed_db) {
-          return true;
-        } else {
-          console.warn(`Password not updated. Changes: ${result.meta.changes}`);
-          return false;
-        }
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      throw new GraphQLError('Failed to delete user', {
+      throw new GraphQLError('Failed to edit user', {
         extensions: {
           code: 'INTERNAL_SERVER_ERROR',
           error,
@@ -263,5 +213,77 @@ export class CfJwtAuthDataSource {
         },
       });
     }
+  }
+
+  async changePassword(input: ChangePasswordInput) {
+    try {
+      const result_user = await this.getUserById(input.id);
+      await this.validateCurrentPassword(input.current_password, result_user.password);
+      return await this.updatePassword(input.id, input.new_password);
+    } catch (error) {
+      this.handleError(error, 'Failed to change password');
+    }
+  }
+
+  private async getUserById(id: string) {
+    const result_user = await this.db.select().from(user).where(eq(user.id, id)).get();
+    if (!result_user) {
+      throw new GraphQLError('User not found', {
+        extensions: {
+          code: 'NOT_FOUND',
+        },
+      });
+    }
+    return result_user;
+  }
+
+  private async validateCurrentPassword(currentPassword: string, storedPassword: string) {
+    const isPasswordMatch = await bcrypt.compare(currentPassword, storedPassword);
+    if (!isPasswordMatch) {
+      throw new GraphQLError('Invalid current password', {
+        extensions: {
+          code: 'UNAUTHORIZED',
+        },
+      });
+    }
+  }
+
+  private async updatePassword(id: string, newPassword: string) {
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const result = await this.db
+      .update(user)
+      .set({
+        password: hashedNewPassword,
+        updated_at: new Date(),
+      })
+      .where(and(eq(user.id, id)))
+      .execute();
+
+    if (result && result.success) {
+      if (result.meta.changed_db) {
+        return true;
+      } else {
+        console.warn(`Password not updated. Changes: ${result.meta.changes}`);
+        return false;
+      }
+    }
+  }
+
+  private handleError(error: unknown, message: string) {
+    console.error('error', error);
+    if (error instanceof GraphQLError || error instanceof Error) {
+      throw new GraphQLError(`${message} ${error.message ? '- ' + error.message : ''}`, {
+        extensions: {
+          code: error instanceof GraphQLError ? error.extensions.code : 'INTERNAL_SERVER_ERROR',
+          error: error.message,
+        },
+      });
+    }
+    throw new GraphQLError(`${message} due to an unexpected error`, {
+      extensions: {
+        code: 'INTERNAL_SERVER_ERROR',
+        error,
+      },
+    });
   }
 }
