@@ -17,6 +17,13 @@ export type Scalars = {
   DateTime: { input: any; output: any };
 };
 
+export type ChangePasswordInput = {
+  confirm_password: Scalars['String']['input'];
+  current_password: Scalars['String']['input'];
+  id: Scalars['ID']['input'];
+  new_password: Scalars['String']['input'];
+};
+
 export enum ColumnName {
   Email = 'email',
   Id = 'id',
@@ -32,7 +39,7 @@ export type EditUserInput = {
   email: Scalars['String']['input'];
   id: Scalars['ID']['input'];
   name: Scalars['String']['input'];
-  role: Role;
+  role?: InputMaybe<Role>;
 };
 
 export type EditUserResponse = {
@@ -55,10 +62,15 @@ export type LoginResponse = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  changePassword: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   editUser: EditUserResponse;
   login: LoginResponse;
   signUp: SignUpResponse;
+};
+
+export type MutationChangePasswordArgs = {
+  input: ChangePasswordInput;
 };
 
 export type MutationDeleteUserArgs = {
@@ -217,6 +229,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  ChangePasswordInput: ChangePasswordInput;
   ColumnName: ColumnName;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   DeleteUserInput: DeleteUserInput;
@@ -241,6 +254,7 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
+  ChangePasswordInput: ChangePasswordInput;
   DateTime: Scalars['DateTime']['output'];
   DeleteUserInput: DeleteUserInput;
   EditUserInput: EditUserInput;
@@ -284,6 +298,7 @@ export type LoginResponseResolvers<
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  changePassword?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationChangePasswordArgs, 'input'>>;
   deleteUser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'input'>>;
   editUser?: Resolver<ResolversTypes['EditUserResponse'], ParentType, ContextType, RequireFields<MutationEditUserArgs, 'input'>>;
   login?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'input'>>;

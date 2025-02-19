@@ -1,8 +1,16 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { DrizzleD1Database } from 'drizzle-orm/d1';
-import { DeleteUserInput, EditUserInput, LoginInput, SignUpInput, UserByEmailInput, UserByFieldInput } from 'generated';
-import { eq, like } from 'drizzle-orm';
+import {
+  ChangePasswordInput,
+  DeleteUserInput,
+  EditUserInput,
+  LoginInput,
+  SignUpInput,
+  UserByEmailInput,
+  UserByFieldInput,
+} from 'generated';
+import { and, eq, like } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { nanoid } from 'nanoid';
 import { Role, user } from 'db/schema/user';
@@ -157,7 +165,7 @@ export class CfJwtAuthDataSource {
         .set({
           name: input.name,
           email: input.email,
-          role: input.role === 'ADMIN' ? Role.ADMIN : Role.USER,
+          ...(input.role && { role: input.role === 'ADMIN' ? Role.ADMIN : Role.USER }),
           updated_at: new Date(),
         })
         .where(eq(user.id, input.id))
@@ -171,6 +179,56 @@ export class CfJwtAuthDataSource {
           ...userWithoutPassword,
         },
       };
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      throw new GraphQLError('Failed to delete user', {
+        extensions: {
+          code: 'INTERNAL_SERVER_ERROR',
+          error,
+        },
+      });
+    }
+  }
+
+  async changePassword(input: ChangePasswordInput) {
+    try {
+      // validate current password
+      const result_user = await this.db.select().from(user).where(eq(user.id, input.id)).get();
+      if (!result_user) {
+        throw new GraphQLError('User not found', {
+          extensions: {
+            code: 'NOT_FOUND',
+          },
+        });
+      }
+      const isPasswordMatch = await bcrypt.compare(input.current_password, result_user.password);
+      if (!isPasswordMatch) {
+        throw new GraphQLError('Invalid current password', {
+          extensions: {
+            code: 'UNAUTHORIZED',
+          },
+        });
+      }
+
+      // change password
+      const hashedNewPassword = await bcrypt.hash(input.new_password, 10);
+      const result = await this.db
+        .update(user)
+        .set({
+          password: hashedNewPassword,
+          updated_at: new Date(),
+        })
+        .where(and(eq(user.id, input.id)))
+        .execute();
+
+      if (result && result.success) {
+        if (result.meta.changed_db) {
+          return true;
+        } else {
+          console.warn(`Password not updated. Changes: ${result.meta.changes}`);
+          return false;
+        }
+      }
     } catch (error) {
       console.error('Unexpected error:', error);
       throw new GraphQLError('Failed to delete user', {

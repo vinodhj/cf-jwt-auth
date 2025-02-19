@@ -74,12 +74,19 @@ export const typeDefs = gql`
     id: ID!
     name: String!
     email: String!
-    role: Role!
+    role: Role
   }
 
   type EditUserResponse {
     success: Boolean!
     user: UserSuccessResponse
+  }
+
+  input ChangePasswordInput {
+    id: ID!
+    current_password: String!
+    new_password: String!
+    confirm_password: String!
   }
 
   enum ColumnName {
@@ -100,5 +107,6 @@ export const typeDefs = gql`
     login(input: LoginInput!): LoginResponse!
     editUser(input: EditUserInput!): EditUserResponse!
     deleteUser(input: DeleteUserInput!): Boolean!
+    changePassword(input: ChangePasswordInput!): Boolean!
   }
 `;
