@@ -1,6 +1,6 @@
 import { Role } from 'db/schema/user';
 import { GraphQLError } from 'graphql';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 export interface TokenPayload {
   email: string;
@@ -11,7 +11,7 @@ export interface TokenPayload {
   exp?: number;
 }
 
-export const generateToken = (payload: TokenPayload, secret: string, expiresIn: string): string => {
+export const generateToken = (payload: TokenPayload, secret: jwt.Secret, expiresIn: SignOptions['expiresIn']): string => {
   try {
     return jwt.sign(payload, secret, { expiresIn });
   } catch (error) {
