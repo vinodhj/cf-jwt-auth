@@ -6,6 +6,10 @@ import { verifyToken } from './resolvers/mutations/helper/jwtUtils';
 import { GraphQLError } from 'graphql';
 import { Role } from 'db/schema/user';
 import { addCORSHeaders } from './cors-headers';
+import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operations';
+import persistedOperationsJson from './persistedOperations.json';
+
+const persistedOperations: Record<string, string> = persistedOperationsJson;
 
 export interface Env {
   DB: D1Database;
@@ -67,6 +71,15 @@ export default {
         },
         landingPage: false,
         graphqlEndpoint: GRAPHQL_PATH,
+        plugins: [
+          // Enable persisted operations by providing a lookup function.
+          usePersistedOperations({
+            allowArbitraryOperations: (request) => request.headers.get('x-allow-arbitrary-operations') === 'true',
+            getPersistedOperation(key: string) {
+              return persistedOperations[key];
+            },
+          }),
+        ],
         context: async () => {
           const projectToken = request.headers.get('X-Project-Token') ?? request.headers.get('x-project-token');
           const authorization = request.headers.get('Authorization') ?? request.headers.get('authorization');
