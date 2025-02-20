@@ -96,6 +96,10 @@ export const typeDefs = gql`
     role
   }
 
+  type LogoutResponse {
+    success: Boolean!
+  }
+
   type Query {
     userByEmail(input: UserByEmailInput!): UserResponse
     userByfield(input: UserByFieldInput): [UserResponse]
@@ -108,5 +112,6 @@ export const typeDefs = gql`
     editUser(input: EditUserInput!): EditUserResponse!
     deleteUser(input: DeleteUserInput!): Boolean!
     changePassword(input: ChangePasswordInput!): Boolean!
+    logout: LogoutResponse!
   }
 `;

@@ -19,7 +19,7 @@ export interface YogaInitialContext {
     cfJwtAuthDataSource: CfJwtAuthDataSource;
   };
   jwtSecret: string;
-  accessToken: string | null;
+  accessToken: string;
   role: Role;
 }
 
@@ -83,16 +83,21 @@ export default {
               const isGraphQLError = error instanceof GraphQLError;
               throw new GraphQLError(isGraphQLError ? error.message : 'Invalid token', {
                 extensions: {
-                  code: 'UNAUTHORIZED',
-                  ...(isGraphQLError ? {} : { error }),
+                  code: isGraphQLError ? error.extensions.code : 'UNAUTHORIZED',
+                  // ...(isGraphQLError ? {} : { error }),
+                  error: isGraphQLError && error.extensions?.error ? error.extensions.error : error,
                 },
               });
             }
+          } else {
+            throw new GraphQLError('Not authenticated - missing or invalid access token', {
+              extensions: { code: 'UNAUTHORIZED' },
+            });
           }
 
           return {
             datasources: {
-              cfJwtAuthDataSource: new CfJwtAuthDataSource({ db, role }),
+              cfJwtAuthDataSource: new CfJwtAuthDataSource({ db, role, jwtKV: env.KV_CF_JWT_AUTH }),
             },
             jwtSecret: env.JWT_SECRET,
             accessToken,

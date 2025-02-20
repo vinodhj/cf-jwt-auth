@@ -6,6 +6,7 @@ export interface TokenPayload {
   email: string;
   name: string;
   role: Role;
+  tokenVersion: number;
   iat?: number;
   exp?: number;
 }
@@ -26,7 +27,22 @@ export const generateToken = (payload: TokenPayload, secret: string, expiresIn: 
 
 export const verifyToken = async (token: string, secret: string, kvNamespace: KVNamespace): Promise<TokenPayload> => {
   try {
-    return jwt.verify(token, secret) as TokenPayload;
+    const payload = jwt.verify(token, secret) as TokenPayload;
+
+    // Retrieve the current token version from KV.
+    // (We use the user's email as the key identifier; adjust if you have a different unique identifier.)
+    const storedVersionStr = await kvNamespace.get(`user:${payload.email}:tokenVersion`);
+    const storedVersion = storedVersionStr ? parseInt(storedVersionStr) : 0;
+
+    if (payload.tokenVersion !== storedVersion) {
+      throw new GraphQLError('For security reasons, your session is no longer valid. Please sign in again', {
+        extensions: {
+          code: 'REVOKE_TOKEN_ERROR',
+          error: `Token has been revoked. payload_version: ${payload.tokenVersion}, stored_version: ${storedVersion}`,
+        },
+      });
+    }
+    return payload;
   } catch (error) {
     console.error('Error verifying token:', error);
     // Save invalid token log to KVNamespace
@@ -39,15 +55,17 @@ export const verifyToken = async (token: string, secret: string, kvNamespace: KV
 
     try {
       await kvNamespace.put(logKey, logValue);
-      console.info('Invalid token log saved to KVNamespace:', logKey);
+      // console.info('Invalid token log saved to KVNamespace:', logKey, logValue);
     } catch (kvError) {
       console.error('Error saving invalid token log to KVNamespace:', kvError);
     }
 
-    throw new GraphQLError('Invalid token', {
+    const isGraphQLError = error instanceof GraphQLError;
+    throw new GraphQLError(isGraphQLError ? error.message : 'Invalid token', {
       extensions: {
-        code: 'UNAUTHORIZED',
-        error,
+        code: isGraphQLError && error.extensions?.code ? error.extensions.code : 'UNAUTHORIZED',
+        // ...(isGraphQLError ? {} : { error }),
+        error: isGraphQLError && error.extensions?.error ? error.extensions.error : error,
       },
     });
   }

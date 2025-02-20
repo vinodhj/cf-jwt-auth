@@ -19,9 +19,11 @@ import bcrypt from 'bcryptjs';
 export class CfJwtAuthDataSource {
   private readonly db: DrizzleD1Database;
   private readonly role: Role;
-  constructor({ db, role }: { db: DrizzleD1Database; role: Role }) {
+  private readonly kv: KVNamespace;
+  constructor({ db, role, jwtKV }: { db: DrizzleD1Database; role: Role; jwtKV: KVNamespace }) {
     this.db = db;
     this.role = role;
+    this.kv = jwtKV;
   }
 
   async signUp(input: SignUpInput) {
@@ -85,6 +87,10 @@ export class CfJwtAuthDataSource {
         });
       }
 
+      // Fetch the current token version for this user (default to 0 if not set)
+      const currentVersionStr = await this.kv.get(`user:${input.email}:tokenVersion`);
+      const currentVersion = currentVersionStr ? parseInt(currentVersionStr) : 0;
+
       const { password, ...userWithoutPassword } = result;
 
       return {
@@ -92,6 +98,7 @@ export class CfJwtAuthDataSource {
         user: {
           ...userWithoutPassword,
         },
+        token_version: currentVersion,
       };
     } catch (error) {
       console.error('error', error);
@@ -213,6 +220,17 @@ export class CfJwtAuthDataSource {
         },
       });
     }
+  }
+
+  async incrementTokenVersion(email: string): Promise<boolean> {
+    // Retrieve the current token version from KV using the user's email as the key.
+    const currentVersionStr = await this.kv.get(`user:${email}:tokenVersion`);
+    let currentVersion = currentVersionStr ? parseInt(currentVersionStr) : 0;
+
+    // Increment the version so that tokens with the old version are now invalid.
+    currentVersion++;
+    await this.kv.put(`user:${email}:tokenVersion`, currentVersion.toString());
+    return true;
   }
 
   async changePassword(input: ChangePasswordInput) {
