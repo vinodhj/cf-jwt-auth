@@ -11,7 +11,7 @@ export const validateUserAccess = (accessToken: string | null, role: Role): void
   }
 
   if (role !== Role.ADMIN) {
-    throw new GraphQLError('Role not authorized', {
+    throw new GraphQLError('Your Role not authorized to perform this action', {
       extensions: {
         code: 'UNAUTHORIZED_ROLE',
       },

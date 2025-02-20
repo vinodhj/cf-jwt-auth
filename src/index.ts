@@ -89,10 +89,6 @@ export default {
                 },
               });
             }
-          } else {
-            throw new GraphQLError('Not authenticated - missing or invalid access token', {
-              extensions: { code: 'UNAUTHORIZED' },
-            });
           }
 
           return {

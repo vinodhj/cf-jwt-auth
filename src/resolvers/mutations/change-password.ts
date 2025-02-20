@@ -6,9 +6,14 @@ import { changePasswordValidators } from './helper/changePasswordValidators';
 export const changePassword = async (
   _: unknown,
   { input }: { input: ChangePasswordInput },
-  { datasources }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource } }
+  { datasources, accessToken }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null }
 ) => {
   try {
+    if (!accessToken) {
+      throw new GraphQLError('Not authenticated', {
+        extensions: { code: 'UNAUTHORIZED' },
+      });
+    }
     // Validate inputs
     changePasswordValidators(input.current_password, input.new_password, input.confirm_password);
 

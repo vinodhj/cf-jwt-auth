@@ -1,13 +1,16 @@
 import { CfJwtAuthDataSource } from '@src/datasources';
 import { DeleteUserInput } from 'generated';
 import { GraphQLError } from 'graphql';
+import { Role } from 'db/schema/user';
+import { validateUserAccess } from './helper/userAccessValidators';
 
 export const deleteUser = async (
   _: unknown,
   { input }: { input: DeleteUserInput },
-  { datasources }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource } }
+  { datasources, accessToken, role }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; role: Role }
 ) => {
   try {
+    validateUserAccess(accessToken, role);
     // Delete user
     return await datasources.cfJwtAuthDataSource.deleteUser(input);
   } catch (error) {
