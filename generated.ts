@@ -15,6 +15,17 @@ export type Scalars = {
   Int: { input: number; output: number };
   Float: { input: number; output: number };
   DateTime: { input: any; output: any };
+  JSON: { input: any; output: any };
+};
+
+export type AdminKvAsset = {
+  __typename?: 'AdminKvAsset';
+  kv_key: Scalars['String']['output'];
+  kv_value?: Maybe<Scalars['JSON']['output']>;
+};
+
+export type AdminKvAssetInput = {
+  kv_key: Scalars['String']['input'];
 };
 
 export type ChangePasswordInput = {
@@ -97,9 +108,14 @@ export type MutationSignUpArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  adminKvAsset?: Maybe<AdminKvAsset>;
   userByEmail?: Maybe<UserResponse>;
   userByfield?: Maybe<Array<Maybe<UserResponse>>>;
   users?: Maybe<Array<Maybe<UserResponse>>>;
+};
+
+export type QueryAdminKvAssetArgs = {
+  input?: InputMaybe<AdminKvAssetInput>;
 };
 
 export type QueryUserByEmailArgs = {
@@ -234,6 +250,8 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AdminKvAsset: ResolverTypeWrapper<AdminKvAsset>;
+  AdminKvAssetInput: AdminKvAssetInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ChangePasswordInput: ChangePasswordInput;
   ColumnName: ColumnName;
@@ -242,6 +260,7 @@ export type ResolversTypes = {
   EditUserInput: EditUserInput;
   EditUserResponse: ResolverTypeWrapper<EditUserResponse>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   LoginInput: LoginInput;
   LoginResponse: ResolverTypeWrapper<LoginResponse>;
   LogoutResponse: ResolverTypeWrapper<LogoutResponse>;
@@ -260,6 +279,8 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AdminKvAsset: AdminKvAsset;
+  AdminKvAssetInput: AdminKvAssetInput;
   Boolean: Scalars['Boolean']['output'];
   ChangePasswordInput: ChangePasswordInput;
   DateTime: Scalars['DateTime']['output'];
@@ -267,6 +288,7 @@ export type ResolversParentTypes = {
   EditUserInput: EditUserInput;
   EditUserResponse: EditUserResponse;
   ID: Scalars['ID']['output'];
+  JSON: Scalars['JSON']['output'];
   LoginInput: LoginInput;
   LoginResponse: LoginResponse;
   LogoutResponse: LogoutResponse;
@@ -282,6 +304,15 @@ export type ResolversParentTypes = {
   UserSuccessResponse: UserSuccessResponse;
 };
 
+export type AdminKvAssetResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes['AdminKvAsset'] = ResolversParentTypes['AdminKvAsset']
+> = {
+  kv_key?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  kv_value?: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
   name: 'DateTime';
 }
@@ -294,6 +325,10 @@ export type EditUserResponseResolvers<
   user?: Resolver<Maybe<ResolversTypes['UserSuccessResponse']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
+
+export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
+  name: 'JSON';
+}
 
 export type LoginResponseResolvers<
   ContextType = any,
@@ -323,6 +358,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  adminKvAsset?: Resolver<Maybe<ResolversTypes['AdminKvAsset']>, ParentType, ContextType, Partial<QueryAdminKvAssetArgs>>;
   userByEmail?: Resolver<Maybe<ResolversTypes['UserResponse']>, ParentType, ContextType, RequireFields<QueryUserByEmailArgs, 'input'>>;
   userByfield?: Resolver<Maybe<Array<Maybe<ResolversTypes['UserResponse']>>>, ParentType, ContextType, Partial<QueryUserByfieldArgs>>;
   users?: Resolver<Maybe<Array<Maybe<ResolversTypes['UserResponse']>>>, ParentType, ContextType>;
@@ -373,8 +409,10 @@ export type UserSuccessResponseResolvers<
 };
 
 export type Resolvers<ContextType = any> = {
+  AdminKvAsset?: AdminKvAssetResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
   EditUserResponse?: EditUserResponseResolvers<ContextType>;
+  JSON?: GraphQLScalarType;
   LoginResponse?: LoginResponseResolvers<ContextType>;
   LogoutResponse?: LogoutResponseResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
