@@ -12,6 +12,7 @@ export interface Env {
   KV_CF_JWT_AUTH: KVNamespace;
   JWT_SECRET: string;
   PROJECT_TOKEN: string;
+  KV_SYNC_TOKEN: string;
 }
 
 export interface YogaInitialContext {
@@ -105,6 +106,33 @@ export default {
       const response = await yoga.fetch(request);
       return addCORSHeaders(response);
     }
+
+    if (url.pathname === '/kv-site-assets' && request.method === 'POST') {
+      const token = request.headers.get('Authorization');
+      if (!token || token !== env.KV_SYNC_TOKEN) {
+        return new Response('Unauthorized', { status: 401 });
+      }
+
+      try {
+        const data: { kv_key: string; kv_value: string } = await request.json();
+        if (!data) {
+          return new Response('Missing data', { status: 400 });
+        }
+
+        const kv_key = data.kv_key;
+        const kv_value = JSON.stringify(data.kv_value);
+
+        await env.KV_CF_JWT_AUTH.put(kv_key, kv_value);
+        const value = await env.KV_CF_JWT_AUTH.get(kv_key);
+        if (value === null) {
+          return new Response('Value not found', { status: 404 });
+        }
+        return new Response('KV config updated', { status: 200 });
+      } catch (error) {
+        return new Response(`Failed to sync : ${error}`, { status: 500 });
+      }
+    }
+
     return new Response('Not found', { status: 404 });
   },
 } as ExportedHandler<Env>;

@@ -2,6 +2,8 @@
 
 import { DrizzleD1Database } from 'drizzle-orm/d1';
 import {
+  AdminKvAsset,
+  AdminKvAssetInput,
   ChangePasswordInput,
   DeleteUserInput,
   EditUserInput,
@@ -243,6 +245,24 @@ export class CfJwtAuthDataSource {
     }
   }
 
+  async adminKvAsset(input: AdminKvAssetInput): Promise<AdminKvAsset> {
+    try {
+      // fetch the admin kv asset from kv store
+      const result = await this.kv.get(input.kv_key.toString());
+      return {
+        kv_key: input.kv_key,
+        kv_value: result ? JSON.parse(result) : null,
+      };
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      throw new GraphQLError('Failed to get admin kv asset', {
+        extensions: {
+          code: 'INTERNAL_SERVER_ERROR',
+          error,
+        },
+      });
+    }
+  }
   private async getUserById(id: string) {
     const result_user = await this.db.select().from(user).where(eq(user.id, id)).get();
     if (!result_user) {

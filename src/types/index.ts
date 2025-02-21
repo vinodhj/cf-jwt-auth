@@ -2,6 +2,7 @@ import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`
   scalar DateTime
+  scalar JSON
 
   enum Role {
     ADMIN
@@ -100,10 +101,20 @@ export const typeDefs = gql`
     success: Boolean!
   }
 
+  type AdminKvAsset {
+    kv_key: String!
+    kv_value: JSON
+  }
+
+  input AdminKvAssetInput {
+    kv_key: String!
+  }
+
   type Query {
     userByEmail(input: UserByEmailInput!): UserResponse
     userByfield(input: UserByFieldInput): [UserResponse]
     users: [UserResponse]
+    adminKvAsset(input: AdminKvAssetInput): AdminKvAsset
   }
 
   type Mutation {
