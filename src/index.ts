@@ -26,6 +26,7 @@ export default {
       });
     }
 
+    // ✅ Handle GraphQL
     if (url.pathname === '/graphql') {
       try {
         return await handleGraphQL(request, env);
@@ -35,6 +36,7 @@ export default {
       }
     }
 
+    // ✅ Handle KV Sync
     if (url.pathname === '/kv-site-assets' && request.method === 'POST') {
       try {
         return await handleKVSync(request, env);
