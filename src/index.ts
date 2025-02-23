@@ -34,6 +34,25 @@ export default {
       return handleKVSync(request, env);
     }
 
-    return new Response('Not found', { status: 404 });
+    return new Response(
+      /* HTML */ `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>404 Not Found</title>
+          </head>
+          <body>
+            <h1>404 Not Found</h1>
+            <p>Sorry, the page ${url.pathname !== '/' ? `(${url.pathname})` : ''} you are looking for could not be found.</p>
+          </body>
+        </html>
+      `,
+      {
+        status: 404,
+        headers: {
+          'Content-Type': 'text/html',
+        },
+      }
+    );
   },
 } as ExportedHandler<Env>;
