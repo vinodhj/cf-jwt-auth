@@ -27,11 +27,20 @@ export default {
     }
 
     if (url.pathname === '/graphql') {
-      return handleGraphQL(request, env);
+      try {
+        return await handleGraphQL(request, env);
+      } catch (error) {
+        console.error('GraphQL Error:', error);
+        return new Response(`Internal Server Error: ${error}`, { status: 500 });
+      }
     }
 
     if (url.pathname === '/kv-site-assets' && request.method === 'POST') {
-      return handleKVSync(request, env);
+      try {
+        return await handleKVSync(request, env);
+      } catch (error) {
+        return new Response(`Internal Server Error: ${error}`, { status: 500 });
+      }
     }
 
     return new Response(
