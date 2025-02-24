@@ -6,14 +6,14 @@ export const users = (
   _: unknown,
   __: unknown,
   {
-    datasources,
+    datasources: { cfJwtAuthDataSource },
     accessToken,
     sessionUser,
   }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
 ) => {
   try {
     validateUserAccess(accessToken, sessionUser, {});
-    return datasources.cfJwtAuthDataSource.users();
+    return cfJwtAuthDataSource.getUserAPI().users();
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

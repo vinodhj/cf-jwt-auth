@@ -8,7 +8,7 @@ export const userByfield = (
   _: unknown,
   { input }: { input: UserByFieldInput },
   {
-    datasources,
+    datasources: { cfJwtAuthDataSource },
     accessToken,
     sessionUser,
   }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
@@ -30,12 +30,12 @@ export const userByfield = (
           },
         });
       }
-      value = input.value.toUpperCase() === 'ADMIN' ? Role.ADMIN : Role.USER;
+      value = input.value.toUpperCase() === 'ADMIN' ? Role.Admin : Role.User;
     } else if (input.field === ColumnName.Name) {
       // Concatenate a wildcard % with the user_id
       value = `${input.value}%`;
     }
-    return datasources.cfJwtAuthDataSource.userByfield({
+    return cfJwtAuthDataSource.getUserAPI().userByfield({
       field: input.field,
       value,
     });

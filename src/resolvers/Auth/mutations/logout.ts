@@ -7,7 +7,7 @@ export const logout = async (
   _: unknown,
   __: unknown,
   {
-    datasources,
+    datasources: { cfJwtAuthDataSource },
     accessToken,
     jwtSecret,
   }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; jwtSecret: string }
@@ -28,7 +28,7 @@ export const logout = async (
       });
     }
 
-    await datasources.cfJwtAuthDataSource.incrementTokenVersion(payload.email);
+    await cfJwtAuthDataSource.getKvStorageService().incrementTokenVersion(payload.email);
 
     return { success: true };
   } catch (error) {

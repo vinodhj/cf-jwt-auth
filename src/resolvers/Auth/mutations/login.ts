@@ -7,14 +7,14 @@ import { GraphQLError } from 'graphql';
 export const login = async (
   _: unknown,
   { input }: { input: LoginInput },
-  { datasources, jwtSecret }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; jwtSecret: string }
+  { datasources: { cfJwtAuthDataSource }, jwtSecret }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; jwtSecret: string }
 ) => {
   try {
     // Validate inputs
     validateInputs(input.email, input.password);
 
     // Login user
-    const result = await datasources.cfJwtAuthDataSource.login(input);
+    const result = await cfJwtAuthDataSource.getAuthAPI().login(input);
 
     const tokenPayload: TokenPayload = {
       id: result.user.id,

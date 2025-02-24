@@ -7,15 +7,19 @@ export const deleteUser = async (
   _: unknown,
   { input }: { input: DeleteUserInput },
   {
-    datasources,
+    datasources: { cfJwtAuthDataSource },
     accessToken,
     sessionUser,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
+  }: {
+    datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource };
+    accessToken: string | null;
+    sessionUser: SessionUserType;
+  }
 ) => {
   try {
     validateUserAccess(accessToken, sessionUser, { id: input.id });
     // Delete user
-    return await datasources.cfJwtAuthDataSource.deleteUser(input);
+    return await cfJwtAuthDataSource.getUserAPI().deleteUser(input);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

@@ -6,14 +6,14 @@ import { GraphQLError } from 'graphql';
 export const signUp = async (
   _: unknown,
   { input }: { input: SignUpInput },
-  { datasources }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource } }
+  { datasources: { cfJwtAuthDataSource } }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource } }
 ) => {
   try {
     // Validate inputs
     validateInputs(input.email, input.password);
 
     // Sign up user
-    return datasources.cfJwtAuthDataSource.signUp(input);
+    return cfJwtAuthDataSource.getAuthAPI().signUp(input);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

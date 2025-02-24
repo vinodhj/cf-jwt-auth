@@ -8,18 +8,20 @@ export const changePassword = async (
   _: unknown,
   { input }: { input: ChangePasswordInput },
   {
-    datasources,
+    datasources: { cfJwtAuthDataSource },
     accessToken,
     sessionUser,
   }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
-) => {
+): Promise<boolean> => {
   try {
     validateUserAccess(accessToken, sessionUser, { id: input.id });
     // Validate inputs
     changePasswordValidators(input.current_password, input.new_password, input.confirm_password);
 
     // Change password
-    return await datasources.cfJwtAuthDataSource.changePassword(input);
+    const result = await cfJwtAuthDataSource.getAuthAPI().changePassword(input);
+
+    return result ?? false;
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

@@ -1,11 +1,14 @@
 import { CfJwtAuthDataSource } from '@src/datasources';
-import { AdminKvAssetInput } from 'generated';
+import { QueryAdminKvAssetArgs } from 'generated';
 import { GraphQLError } from 'graphql';
 
 export const adminKvAsset = (
   _: unknown,
-  { input }: { input: AdminKvAssetInput },
-  { datasources, accessToken }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null }
+  { input }: QueryAdminKvAssetArgs,
+  {
+    datasources: { cfJwtAuthDataSource },
+    accessToken,
+  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null }
 ) => {
   try {
     if (!accessToken) {
@@ -13,7 +16,7 @@ export const adminKvAsset = (
         extensions: { code: 'UNAUTHORIZED' },
       });
     }
-    return datasources.cfJwtAuthDataSource.adminKvAsset(input);
+    return cfJwtAuthDataSource.getKvStorageService().adminKvAsset(input);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors
