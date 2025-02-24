@@ -7,6 +7,8 @@ import { GraphQLError } from 'graphql';
 import { Role } from 'db/schema/user';
 import { addCORSHeaders } from '@src/cors-headers';
 import { Env } from '@src/index';
+import { applyMiddleware } from 'graphql-middleware';
+import { graphql_permissions } from './graphql_permissions';
 
 export interface YogaInitialContext {
   datasources: {
@@ -15,6 +17,8 @@ export interface YogaInitialContext {
   jwtSecret: string;
   accessToken: string;
   role: Role;
+  projectToken: string;
+  kvNamespace: KVNamespace;
 }
 
 const GRAPHQL_PATH = '/graphql';
@@ -34,8 +38,11 @@ const validateProjectToken = (projectToken: string | null, expectedToken: string
 
 export default async function handleGraphQL(request: Request, env: Env): Promise<Response> {
   const db = drizzle(env.DB);
+
+  const schemaWithMiddleware = applyMiddleware(schema, graphql_permissions); // Apply Shield Middleware
+
   const yoga = createYoga({
-    schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
+    schema: schemaWithMiddleware as YogaSchemaDefinition<object, YogaInitialContext>,
     cors: {
       origin: '*',
       methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
@@ -69,12 +76,14 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
       }
 
       return {
+        projectToken,
         datasources: {
-          cfJwtAuthDataSource: new CfJwtAuthDataSource({ db, role, jwtKV: env.KV_CF_JWT_AUTH }),
+          cfJwtAuthDataSource: new CfJwtAuthDataSource({ db, role, jwtKV: env.KV_CF_JWT_AUTH, accessToken, jwtSecret: env.JWT_SECRET }),
         },
         jwtSecret: env.JWT_SECRET,
         accessToken,
         role,
+        kvNamespace: env.KV_CF_JWT_AUTH,
       };
     },
   });
