@@ -14,12 +14,12 @@ export type SessionUserType = {
 export class CfJwtAuthDataSource {
   private readonly authAPI: AuthDataSource;
   private readonly userAPI: UserDataSource;
-  private readonly kvStorageService: KvStorageDataSource;
+  private readonly kvStorageAPI: KvStorageDataSource;
 
   constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser: SessionUserType }) {
     this.authAPI = new AuthDataSource({ db, jwtKV, sessionUser });
     this.userAPI = new UserDataSource({ db, jwtKV, sessionUser });
-    this.kvStorageService = new KvStorageDataSource(jwtKV);
+    this.kvStorageAPI = new KvStorageDataSource(jwtKV);
   }
 
   getAuthAPI() {
@@ -30,7 +30,7 @@ export class CfJwtAuthDataSource {
     return this.userAPI;
   }
 
-  getKvStorageService() {
-    return this.kvStorageService;
+  getKvStorageAPI() {
+    return this.kvStorageAPI;
   }
 }

@@ -28,7 +28,7 @@ export const logout = async (
       });
     }
 
-    await cfJwtAuthDataSource.getKvStorageService().incrementTokenVersion(payload.email);
+    await cfJwtAuthDataSource.getKvStorageAPI().incrementTokenVersion(payload.email);
 
     return { success: true };
   } catch (error) {

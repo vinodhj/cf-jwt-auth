@@ -16,7 +16,7 @@ export const adminKvAsset = (
         extensions: { code: 'UNAUTHORIZED' },
       });
     }
-    return cfJwtAuthDataSource.getKvStorageService().adminKvAsset(input);
+    return cfJwtAuthDataSource.getKvStorageAPI().adminKvAsset(input);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors
