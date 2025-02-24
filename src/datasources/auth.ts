@@ -11,12 +11,12 @@ import { handleError, validateCurrentPassword } from './utils';
 export class AuthDataSource {
   private readonly db: DrizzleD1Database;
   private readonly kv: KVNamespace;
-  private readonly sessionUser: SessionUserType;
+  private readonly sessionUser: SessionUserType | null;
 
-  constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser: SessionUserType }) {
+  constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser?: SessionUserType }) {
     this.db = db;
     this.kv = jwtKV;
-    this.sessionUser = sessionUser;
+    this.sessionUser = sessionUser ?? null;
   }
 
   async signUp(input: SignUpInput) {
@@ -145,15 +145,11 @@ export class AuthDataSource {
         updated_at: new Date(),
       })
       .where(and(eq(user.id, id)))
-      .execute();
+      .returning()
+      .get();
 
-    if (result && result.success) {
-      if (result.meta.changed_db) {
-        return true;
-      } else {
-        console.warn(`Password not updated. Changes: ${result.meta.changes}`);
-        return false;
-      }
-    }
+    if (result) return true;
+    console.warn('Password update failed');
+    return false;
   }
 }

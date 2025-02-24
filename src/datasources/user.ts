@@ -8,12 +8,12 @@ import { SessionUserType } from '.';
 export class UserDataSource {
   private readonly db: DrizzleD1Database;
   private readonly kv: KVNamespace;
-  private readonly sessionUser: SessionUserType;
+  private readonly sessionUser: SessionUserType | null;
 
-  constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser: SessionUserType }) {
+  constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser?: SessionUserType }) {
     this.db = db;
     this.kv = jwtKV;
-    this.sessionUser = sessionUser;
+    this.sessionUser = sessionUser ?? null;
   }
 
   async users() {
@@ -46,10 +46,8 @@ export class UserDataSource {
 
   async userByfield(input: UserByFieldInput) {
     try {
-      if (input.field === 'name') {
-        return this.db.select().from(user).where(like(user.name, input.value)).execute();
-      }
-      return this.db.select().from(user).where(eq(user[input.field], input.value)).execute();
+      const condition = input.field === 'name' ? like(user[input.field], input.value) : eq(user[input.field], input.value);
+      return this.db.select().from(user).where(condition).execute();
     } catch (error) {
       console.error('Unexpected error:', error);
       throw new GraphQLError('Failed to get user', {

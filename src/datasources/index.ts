@@ -16,7 +16,7 @@ export class CfJwtAuthDataSource {
   private readonly userAPI: UserDataSource;
   private readonly kvStorageAPI: KvStorageDataSource;
 
-  constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser: SessionUserType }) {
+  constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser?: SessionUserType }) {
     this.authAPI = new AuthDataSource({ db, jwtKV, sessionUser });
     this.userAPI = new UserDataSource({ db, jwtKV, sessionUser });
     this.kvStorageAPI = new KvStorageDataSource(jwtKV);
