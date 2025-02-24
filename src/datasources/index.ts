@@ -17,15 +17,32 @@ import { GraphQLError } from 'graphql';
 import { nanoid } from 'nanoid';
 import { Role, user } from 'db/schema/user';
 import bcrypt from 'bcryptjs';
+import { verifyToken } from '@src/resolvers/mutations/helper/jwtUtils';
 
 export class CfJwtAuthDataSource {
   private readonly db: DrizzleD1Database;
   private readonly role: Role;
   private readonly kv: KVNamespace;
-  constructor({ db, role, jwtKV }: { db: DrizzleD1Database; role: Role; jwtKV: KVNamespace }) {
+  private readonly accessToken: string | null;
+  private readonly jwtSecret: string;
+  constructor({
+    db,
+    role,
+    jwtKV,
+    accessToken,
+    jwtSecret,
+  }: {
+    db: DrizzleD1Database;
+    role: Role;
+    jwtKV: KVNamespace;
+    accessToken: string | null;
+    jwtSecret: string;
+  }) {
     this.db = db;
     this.role = role;
     this.kv = jwtKV;
+    this.accessToken = accessToken;
+    this.jwtSecret = jwtSecret;
   }
 
   async signUp(input: SignUpInput) {
@@ -174,7 +191,7 @@ export class CfJwtAuthDataSource {
         .set({
           name: input.name,
           email: input.email,
-          ...(input.role && { role: input.role === 'ADMIN' ? Role.ADMIN : Role.USER }),
+          ...(input.role && this.role === Role.ADMIN && { role: input.role === 'ADMIN' ? Role.ADMIN : Role.USER }),
           updated_at: new Date(),
         })
         .where(eq(user.id, input.id))
@@ -238,6 +255,17 @@ export class CfJwtAuthDataSource {
   async changePassword(input: ChangePasswordInput) {
     try {
       const result_user = await this.getUserById(input.id);
+      if (this.role !== Role.ADMIN && this.accessToken) {
+        const jwtPayload = await verifyToken(this.accessToken, this.jwtSecret, this.kv);
+        if (result_user.email !== jwtPayload.email) {
+          console.log('You are not authorized to change another users password');
+          throw new GraphQLError('You are not authorized to change another users password', {
+            extensions: {
+              code: 'FORBIDDEN',
+            },
+          });
+        }
+      }
       await this.validateCurrentPassword(input.current_password, result_user.password);
       return await this.updatePassword(input.id, input.new_password);
     } catch (error) {
