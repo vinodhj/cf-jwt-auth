@@ -2,7 +2,7 @@ import { CfJwtAuthDataSource } from '@src/datasources';
 import { YogaSchemaDefinition, createYoga } from 'graphql-yoga';
 import { drizzle } from 'drizzle-orm/d1';
 import { schema } from '@src/schemas';
-import { verifyToken } from '@src/resolvers/mutations/helper/jwtUtils';
+import { verifyToken } from '@src/resolvers/Auth/mutations/helper/jwtUtils';
 import { GraphQLError } from 'graphql';
 import { Role } from 'db/schema/user';
 import { addCORSHeaders } from '@src/cors-headers';
