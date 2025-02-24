@@ -7,6 +7,7 @@ import { GraphQLError } from 'graphql';
 import { Role } from 'db/schema/user';
 import { addCORSHeaders } from '@src/cors-headers';
 import { Env } from '@src/index';
+import { defineAbilitiesFor } from './abilities';
 
 export interface YogaInitialContext {
   datasources: {
@@ -14,7 +15,14 @@ export interface YogaInitialContext {
   };
   jwtSecret: string;
   accessToken: string;
-  role: Role;
+  user: {
+    id: string;
+    role: Role;
+    email: string;
+    // other user properties if needed
+  };
+  ability: ReturnType<typeof defineAbilitiesFor>;
+  role: Role; // need to remove and use user.role
 }
 
 const GRAPHQL_PATH = '/graphql';
@@ -52,10 +60,12 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
 
       const accessToken = getAccessToken(authorization);
       let role = Role.USER;
+      let user = { id: 'guest', role: Role.USER, email: 'guest@guest.com' };
       if (accessToken) {
         try {
           const jwtVerifyToken = await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
           role = jwtVerifyToken.role;
+          user = { id: jwtVerifyToken.id, role: jwtVerifyToken.role, email: jwtVerifyToken.email };
         } catch (error) {
           console.error('Token verification failed:', error);
           const isGraphQLError = error instanceof GraphQLError;
@@ -75,6 +85,8 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
         jwtSecret: env.JWT_SECRET,
         accessToken,
         role,
+        user,
+        ability: defineAbilitiesFor(user),
       };
     },
   });

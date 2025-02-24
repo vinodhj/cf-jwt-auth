@@ -16,7 +16,13 @@ export const login = async (
     // Login user
     const result = await datasources.cfJwtAuthDataSource.login(input);
 
-    const tokenPayload = { email: result.user.email, name: result.user.name, role: result.user.role, tokenVersion: result.token_version };
+    const tokenPayload = {
+      id: result.user.id,
+      email: result.user.email,
+      name: result.user.name,
+      role: result.user.role,
+      tokenVersion: result.token_version,
+    };
 
     // Generate JWT token
     const token = generateToken(tokenPayload, jwtSecret, '8h');

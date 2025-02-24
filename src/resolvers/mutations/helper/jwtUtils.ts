@@ -3,6 +3,7 @@ import { GraphQLError } from 'graphql';
 import jwt, { SignOptions } from 'jsonwebtoken';
 
 export interface TokenPayload {
+  id: string;
   email: string;
   name: string;
   role: Role;
