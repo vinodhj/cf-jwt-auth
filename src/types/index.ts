@@ -4,6 +4,7 @@ export const typeDefs = gql`
   scalar DateTime
   scalar JSON
 
+  # ADMIN, MODERATOR, USER
   enum Role {
     ADMIN
     USER

@@ -18,14 +18,21 @@ import { nanoid } from 'nanoid';
 import { Role, user } from 'db/schema/user';
 import bcrypt from 'bcryptjs';
 
+export type SessionUserType = {
+  id: string;
+  role: Role;
+  email: string;
+  name: string;
+} | null;
+
 export class CfJwtAuthDataSource {
   private readonly db: DrizzleD1Database;
-  private readonly role: Role;
   private readonly kv: KVNamespace;
-  constructor({ db, role, jwtKV }: { db: DrizzleD1Database; role: Role; jwtKV: KVNamespace }) {
+  private readonly sessionUser: SessionUserType;
+  constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser: SessionUserType }) {
     this.db = db;
-    this.role = role;
     this.kv = jwtKV;
+    this.sessionUser = sessionUser;
   }
 
   async signUp(input: SignUpInput) {

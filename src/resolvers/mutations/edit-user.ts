@@ -1,16 +1,19 @@
-import { CfJwtAuthDataSource } from '@src/datasources';
+import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
 import { EditUserInput } from 'generated';
 import { GraphQLError } from 'graphql';
-import { Role } from 'db/schema/user';
 import { validateUserAccess } from './helper/userAccessValidators';
 
 export const editUser = async (
   _: unknown,
   { input }: { input: EditUserInput },
-  { datasources, accessToken, role }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; role: Role }
+  {
+    datasources,
+    accessToken,
+    sessionUser,
+  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
 ) => {
   try {
-    validateUserAccess(accessToken, role);
+    validateUserAccess(accessToken, sessionUser, { id: input.id });
     // edit user
     return await datasources.cfJwtAuthDataSource.editUser(input);
   } catch (error) {

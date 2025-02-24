@@ -1,7 +1,14 @@
+import { SessionUserType } from '@src/datasources';
 import { Role } from 'db/schema/user';
 import { GraphQLError } from 'graphql';
 
-export const validateUserAccess = (accessToken: string | null, role: Role): void => {
+export interface TargetIdentifier {
+  id?: string;
+  email?: string;
+}
+
+export const validateUserAccess = (accessToken: string | null, sessionUser: SessionUserType, target: TargetIdentifier): void => {
+  console.log('validateUserAccess', sessionUser, target);
   if (!accessToken) {
     throw new GraphQLError('Unauthorized token', {
       extensions: {
@@ -10,11 +17,21 @@ export const validateUserAccess = (accessToken: string | null, role: Role): void
     });
   }
 
-  if (role !== Role.ADMIN) {
-    throw new GraphQLError('Your Role not authorized to perform this action', {
-      extensions: {
-        code: 'UNAUTHORIZED_ROLE',
-      },
+  if (!sessionUser?.role) {
+    throw new GraphQLError('User role is required', {
+      extensions: { code: 'ROLE_REQUIRED' },
     });
   }
+
+  // Check if the session user is modifying their own record by id or email
+  const isSameUser = (target.id && sessionUser.id === target.id) || (target.email && sessionUser.email === target.email);
+
+  // Allow if the user is editing their own record or is an admin.
+  if (isSameUser || sessionUser.role === Role.ADMIN) {
+    return;
+  }
+
+  throw new GraphQLError('Your Role not authorized to perform this action', {
+    extensions: { code: 'UNAUTHORIZED_ROLE' },
+  });
 };

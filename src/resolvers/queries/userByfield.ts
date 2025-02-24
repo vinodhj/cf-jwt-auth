@@ -1,18 +1,27 @@
-import { CfJwtAuthDataSource } from '@src/datasources';
+import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
 import { Role } from 'db/schema/user';
-import { UserByFieldInput } from 'generated';
+import { ColumnName, UserByFieldInput } from 'generated';
 import { GraphQLError } from 'graphql';
 import { validateUserAccess } from '../mutations/helper/userAccessValidators';
 
 export const userByfield = (
   _: unknown,
   { input }: { input: UserByFieldInput },
-  { datasources, accessToken, role }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; role: Role }
+  {
+    datasources,
+    accessToken,
+    sessionUser,
+  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
 ) => {
   try {
-    validateUserAccess(accessToken, role);
+    if (input.field === ColumnName.Id || input.field === ColumnName.Email) {
+      validateUserAccess(accessToken, sessionUser, { [input.field]: input.value });
+    } else {
+      validateUserAccess(accessToken, sessionUser, {});
+    }
+
     let value = input.value;
-    if (input.field === 'role') {
+    if (input.field === ColumnName.Role) {
       const validRoles = ['ADMIN', 'USER'];
       if (!validRoles.includes(input.value.toUpperCase())) {
         throw new GraphQLError('Invalid role value', {
@@ -22,7 +31,7 @@ export const userByfield = (
         });
       }
       value = input.value.toUpperCase() === 'ADMIN' ? Role.ADMIN : Role.USER;
-    } else if (input.field === 'name') {
+    } else if (input.field === ColumnName.Name) {
       // Concatenate a wildcard % with the user_id
       value = `${input.value}%`;
     }

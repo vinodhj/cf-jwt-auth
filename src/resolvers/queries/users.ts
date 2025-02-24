@@ -1,15 +1,18 @@
-import { CfJwtAuthDataSource } from '@src/datasources';
-import { Role } from 'db/schema/user';
+import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
 import { GraphQLError } from 'graphql';
 import { validateUserAccess } from '../mutations/helper/userAccessValidators';
 
 export const users = (
   _: unknown,
   __: unknown,
-  { datasources, accessToken, role }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; role: Role }
+  {
+    datasources,
+    accessToken,
+    sessionUser,
+  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
 ) => {
   try {
-    validateUserAccess(accessToken, role);
+    validateUserAccess(accessToken, sessionUser, {});
     return datasources.cfJwtAuthDataSource.users();
   } catch (error) {
     if (error instanceof GraphQLError) {

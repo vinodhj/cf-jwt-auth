@@ -13,8 +13,8 @@ export interface YogaInitialContext {
     cfJwtAuthDataSource: CfJwtAuthDataSource;
   };
   jwtSecret: string;
-  accessToken: string;
-  role: Role;
+  accessToken: string | null;
+  sessionUser: { id: string; role: Role; email: string; name: string } | null;
 }
 
 const GRAPHQL_PATH = '/graphql';
@@ -37,6 +37,7 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
   const yoga = createYoga({
     schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
     cors: {
+      // TODO: Allow only specific origins using environment variables
       origin: '*',
       methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
       credentials: true,
@@ -51,13 +52,18 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
       validateProjectToken(projectToken, env.PROJECT_TOKEN);
 
       const accessToken = getAccessToken(authorization);
-      let role = Role.USER;
+      let sessionUser = null;
       if (accessToken) {
         try {
+          // TODO: jwt verify func should be called on every request, though it's expensive and performance optimizations may be needed.
           const jwtVerifyToken = await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
-          role = jwtVerifyToken.role;
+          sessionUser = {
+            id: jwtVerifyToken.id,
+            role: jwtVerifyToken.role,
+            email: jwtVerifyToken.email,
+            name: jwtVerifyToken.name,
+          };
         } catch (error) {
-          console.error('Token verification failed:', error);
           const isGraphQLError = error instanceof GraphQLError;
           throw new GraphQLError(isGraphQLError ? error.message : 'Invalid token', {
             extensions: {
@@ -70,11 +76,11 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
 
       return {
         datasources: {
-          cfJwtAuthDataSource: new CfJwtAuthDataSource({ db, role, jwtKV: env.KV_CF_JWT_AUTH }),
+          cfJwtAuthDataSource: new CfJwtAuthDataSource({ db, jwtKV: env.KV_CF_JWT_AUTH, sessionUser }),
         },
         jwtSecret: env.JWT_SECRET,
         accessToken,
-        role,
+        sessionUser,
       };
     },
   });

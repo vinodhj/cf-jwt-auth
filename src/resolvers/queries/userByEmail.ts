@@ -1,5 +1,4 @@
-import { CfJwtAuthDataSource } from '@src/datasources';
-import { Role } from 'db/schema/user';
+import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
 import { UserByEmailInput } from 'generated';
 import { GraphQLError } from 'graphql';
 import { validateUserAccess } from '../mutations/helper/userAccessValidators';
@@ -7,10 +6,14 @@ import { validateUserAccess } from '../mutations/helper/userAccessValidators';
 export const userByEmail = (
   _: unknown,
   { input }: { input: UserByEmailInput },
-  { datasources, accessToken, role }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; role: Role }
+  {
+    datasources,
+    accessToken,
+    sessionUser,
+  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
 ) => {
   try {
-    validateUserAccess(accessToken, role);
+    validateUserAccess(accessToken, sessionUser, { email: input.email });
     return datasources.cfJwtAuthDataSource.userByEmail(input);
   } catch (error) {
     if (error instanceof GraphQLError) {

@@ -1,7 +1,7 @@
 import { CfJwtAuthDataSource } from '@src/datasources';
 import { LoginInput } from 'generated';
 import { validateInputs } from './helper/authValidators';
-import { generateToken } from './helper/jwtUtils';
+import { generateToken, TokenPayload } from './helper/jwtUtils';
 import { GraphQLError } from 'graphql';
 
 export const login = async (
@@ -16,7 +16,13 @@ export const login = async (
     // Login user
     const result = await datasources.cfJwtAuthDataSource.login(input);
 
-    const tokenPayload = { email: result.user.email, name: result.user.name, role: result.user.role, tokenVersion: result.token_version };
+    const tokenPayload: TokenPayload = {
+      id: result.user.id,
+      email: result.user.email,
+      name: result.user.name,
+      role: result.user.role,
+      tokenVersion: result.token_version,
+    };
 
     // Generate JWT token
     const token = generateToken(tokenPayload, jwtSecret, '8h');
