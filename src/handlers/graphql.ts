@@ -1,20 +1,17 @@
-import { CfJwtAuthDataSource } from '@src/datasources';
 import { YogaSchemaDefinition, createYoga } from 'graphql-yoga';
 import { drizzle } from 'drizzle-orm/d1';
 import { schema } from '@src/schemas';
-import { verifyToken } from '@src/resolvers/mutations/helper/jwtUtils';
+import { verifyToken } from '@src/services/helper/jwtUtils';
 import { GraphQLError } from 'graphql';
-import { Role } from 'db/schema/user';
 import { addCORSHeaders } from '@src/cors-headers';
 import { Env } from '@src/index';
+import { APIs, createAPIs, SessionUserType } from '@src/services';
 
 export interface YogaInitialContext {
-  datasources: {
-    cfJwtAuthDataSource: CfJwtAuthDataSource;
-  };
   jwtSecret: string;
-  accessToken: string;
-  role: Role;
+  accessToken: string | null;
+  sessionUser: SessionUserType;
+  apis: APIs;
 }
 
 const GRAPHQL_PATH = '/graphql';
@@ -37,6 +34,7 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
   const yoga = createYoga({
     schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
     cors: {
+      // TODO: Allow only specific origins using environment variables
       origin: '*',
       methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
       credentials: true,
@@ -47,15 +45,21 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
     context: async () => {
       const projectToken = request.headers.get('X-Project-Token') ?? request.headers.get('x-project-token');
       const authorization = request.headers.get('Authorization') ?? request.headers.get('authorization');
-
       validateProjectToken(projectToken, env.PROJECT_TOKEN);
 
       const accessToken = getAccessToken(authorization);
-      let role = Role.USER;
+      let sessionUser = null;
+
       if (accessToken) {
         try {
+          // TODO: jwt verify func should be called on every request, though it's expensive and performance optimizations may be needed.
           const jwtVerifyToken = await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
-          role = jwtVerifyToken.role;
+          sessionUser = {
+            id: jwtVerifyToken.id,
+            role: jwtVerifyToken.role,
+            email: jwtVerifyToken.email,
+            name: jwtVerifyToken.name,
+          };
         } catch (error) {
           console.error('Token verification failed:', error);
           const isGraphQLError = error instanceof GraphQLError;
@@ -68,13 +72,18 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
         }
       }
 
+      // Create service APIs
+      const { authAPI, userAPI, kvStorageAPI } = createAPIs({ db, env, sessionUser });
+
       return {
-        datasources: {
-          cfJwtAuthDataSource: new CfJwtAuthDataSource({ db, role, jwtKV: env.KV_CF_JWT_AUTH }),
-        },
         jwtSecret: env.JWT_SECRET,
         accessToken,
-        role,
+        sessionUser,
+        apis: {
+          authAPI,
+          userAPI,
+          kvStorageAPI,
+        },
       };
     },
   });

@@ -1,4 +1,12 @@
-import { Mutation } from './mutations';
-import { Query } from './queries';
+import { Resolvers } from 'generated';
+import { AuthMutation } from './auth/mutations';
+import { AuthQuery } from './auth/queries';
 
-export const resolvers = { Query, Mutation };
+const Query = {
+  ...AuthQuery,
+};
+const Mutation = {
+  ...AuthMutation,
+};
+
+export const resolvers: Resolvers = { Query, Mutation };

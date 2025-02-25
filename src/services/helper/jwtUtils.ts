@@ -3,6 +3,7 @@ import { GraphQLError } from 'graphql';
 import jwt, { SignOptions } from 'jsonwebtoken';
 
 export interface TokenPayload {
+  id: string;
   email: string;
   name: string;
   role: Role;
@@ -54,7 +55,8 @@ export const verifyToken = async (token: string, secret: string, kvNamespace: KV
     });
 
     try {
-      await kvNamespace.put(logKey, logValue);
+      // Expire the log after 7 days
+      await kvNamespace.put(logKey, logValue, { expirationTtl: 7 * 24 * 60 * 60 });
       // console.info('Invalid token log saved to KVNamespace:', logKey, logValue);
     } catch (kvError) {
       console.error('Error saving invalid token log to KVNamespace:', kvError);

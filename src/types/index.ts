@@ -4,6 +4,7 @@ export const typeDefs = gql`
   scalar DateTime
   scalar JSON
 
+  # ADMIN, MODERATOR, USER
   enum Role {
     ADMIN
     USER
@@ -112,9 +113,9 @@ export const typeDefs = gql`
 
   type Query {
     userByEmail(input: UserByEmailInput!): UserResponse
-    userByfield(input: UserByFieldInput): [UserResponse]
+    userByfield(input: UserByFieldInput!): [UserResponse]
     users: [UserResponse]
-    adminKvAsset(input: AdminKvAssetInput): AdminKvAsset
+    adminKvAsset(input: AdminKvAssetInput!): AdminKvAsset
   }
 
   type Mutation {
