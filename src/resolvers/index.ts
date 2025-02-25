@@ -1,6 +1,6 @@
 import { Resolvers } from 'generated';
-import { AuthMutation } from './token-auth/mutations';
-import { AuthQuery } from './token-auth/queries';
+import { AuthMutation } from './auth/mutations';
+import { AuthQuery } from './auth/queries';
 
 const Query = {
   ...AuthQuery,
