@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 
-export const validateInputs = (email: string, password: string): void => {
+export const validateEmailAndPassword = (email: string, password: string): void => {
   // Validate email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {

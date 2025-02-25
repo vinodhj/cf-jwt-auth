@@ -1,19 +1,10 @@
-import { CfJwtAuthDataSource } from '@src/datasources';
 import { SignUpInput } from 'generated';
-import { validateInputs } from './helper/authValidators';
 import { GraphQLError } from 'graphql';
+import { APIs } from '@src/services';
 
-export const signUp = async (
-  _: unknown,
-  { input }: { input: SignUpInput },
-  { datasources: { cfJwtAuthDataSource } }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource } }
-) => {
+export const signUp = async (_: unknown, { input }: { input: SignUpInput }, { apis: { authAPI } }: { apis: APIs }) => {
   try {
-    // Validate inputs
-    validateInputs(input.email, input.password);
-
-    // Sign up user
-    return cfJwtAuthDataSource.getAuthAPI().signUp(input);
+    return await authAPI.signUp(input);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

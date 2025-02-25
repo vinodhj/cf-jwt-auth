@@ -1,19 +1,9 @@
-import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
+import { APIs } from '@src/services';
 import { GraphQLError } from 'graphql';
-import { validateUserAccess } from '../mutations/helper/userAccessValidators';
 
-export const users = (
-  _: unknown,
-  __: unknown,
-  {
-    datasources: { cfJwtAuthDataSource },
-    accessToken,
-    sessionUser,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
-) => {
+export const users = async (_: unknown, __: unknown, { apis: { userAPI }, accessToken }: { accessToken: string | null; apis: APIs }) => {
   try {
-    validateUserAccess(accessToken, sessionUser, {});
-    return cfJwtAuthDataSource.getUserAPI().users();
+    return await userAPI.users(accessToken);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors
