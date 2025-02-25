@@ -5,13 +5,13 @@ import { GraphQLError } from 'graphql';
 import { nanoid } from 'nanoid';
 import { Role, user } from 'db/schema/user';
 import bcrypt from 'bcryptjs';
-import { SessionUserType } from '.';
 import { handleError, validateCurrentPassword } from './utils';
+import { SessionUserType } from '@src/services';
 
 export class AuthDataSource {
   private readonly db: DrizzleD1Database;
   private readonly kv: KVNamespace;
-  private readonly sessionUser: SessionUserType | null;
+  private readonly sessionUser: SessionUserType;
 
   constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser?: SessionUserType }) {
     this.db = db;

@@ -1,36 +1,9 @@
-import { CfJwtAuthDataSource } from '@src/datasources';
 import { GraphQLError } from 'graphql';
-import jwt from 'jsonwebtoken';
-import { TokenPayload } from './helper/jwtUtils';
+import { APIs } from '@src/services';
 
-export const logout = async (
-  _: unknown,
-  __: unknown,
-  {
-    datasources: { cfJwtAuthDataSource },
-    accessToken,
-    jwtSecret,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; jwtSecret: string }
-) => {
+export const logout = async (_: unknown, __: unknown, { apis: { authAPI }, accessToken }: { apis: APIs; accessToken: string | null }) => {
   try {
-    if (!accessToken) {
-      throw new GraphQLError('Not authenticated', {
-        extensions: { code: 'UNAUTHORIZED' },
-      });
-    }
-
-    let payload: TokenPayload;
-    try {
-      payload = jwt.verify(accessToken, jwtSecret) as TokenPayload;
-    } catch (error) {
-      throw new GraphQLError('Invalid token', {
-        extensions: { code: 'UNAUTHORIZED' },
-      });
-    }
-
-    await cfJwtAuthDataSource.getKvStorageAPI().incrementTokenVersion(payload.email);
-
-    return { success: true };
+    return await authAPI.logout(accessToken);
   } catch (error) {
     if (error instanceof GraphQLError || error instanceof Error) {
       // Re-throw GraphQL-specific errors

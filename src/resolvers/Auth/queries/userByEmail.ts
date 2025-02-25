@@ -1,26 +1,14 @@
-import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
+import { APIs } from '@src/services';
 import { UserByEmailInput } from 'generated';
 import { GraphQLError } from 'graphql';
-import { validateUserAccess } from '../mutations/helper/userAccessValidators';
 
 export const userByEmail = async (
   _: unknown,
   { input }: { input: UserByEmailInput },
-  {
-    datasources: { cfJwtAuthDataSource },
-    accessToken,
-    sessionUser,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
+  { apis: { userAPI }, accessToken }: { apis: APIs; accessToken: string | null }
 ) => {
   try {
-    validateUserAccess(accessToken, sessionUser, { email: input.email });
-    const result = await cfJwtAuthDataSource.getUserAPI().userByEmail(input);
-    if (!result) {
-      throw new GraphQLError('User not found', {
-        extensions: { code: 'NOT_FOUND' },
-      });
-    }
-    return result;
+    return await userAPI.userByEmail(input, accessToken);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

@@ -1,38 +1,43 @@
 import { AuthDataSource } from '@src/datasources/auth';
 import { ChangePasswordInput, LoginInput, SignUpInput } from 'generated';
-import { validateEmailAndPassword } from '@src/resolvers/Auth/mutations/helper/authValidators';
-import { generateToken, TokenPayload } from '@src/resolvers/Auth/mutations/helper/jwtUtils';
-import { SessionUserType } from '@src/datasources';
-import { validateUserAccess } from '@src/resolvers/Auth/mutations/helper/userAccessValidators';
-import { changePasswordValidators } from '@src/resolvers/Auth/mutations/helper/changePasswordValidators';
+import { validateEmailAndPassword } from '@src/services/helper/authValidators';
+import { generateToken, TokenPayload } from '@src/services/helper/jwtUtils';
+import { validateUserAccess } from '@src/services/helper/userAccessValidators';
+import { changePasswordValidators } from '@src/services/helper/changePasswordValidators';
+import { GraphQLError } from 'graphql';
+import jwt from 'jsonwebtoken';
+import { KvStorageServiceAPI } from './kv-storage-service';
+import { SessionUserType } from '.';
 
 export class AuthServiceAPI {
   private readonly authDataSource: AuthDataSource;
+  private readonly kvStorageAPI: KvStorageServiceAPI;
   private readonly jwtSecret: string;
-  private readonly sessionUser: SessionUserType | null;
+  private readonly sessionUser: SessionUserType;
 
   constructor({
     authDataSource,
+    kvStorageAPI,
     jwtSecret,
     sessionUser,
   }: {
     authDataSource: AuthDataSource;
+    kvStorageAPI: KvStorageServiceAPI;
     jwtSecret: string;
     sessionUser?: SessionUserType;
   }) {
     this.authDataSource = authDataSource;
+    this.kvStorageAPI = kvStorageAPI;
     this.jwtSecret = jwtSecret;
     this.sessionUser = sessionUser ?? null;
   }
 
   async signUp(input: SignUpInput) {
-    // Validate inputs (you can customize validation as needed)
     validateEmailAndPassword(input.email, input.password);
     return await this.authDataSource.signUp(input);
   }
 
   async login(input: LoginInput) {
-    // Validate inputs
     validateEmailAndPassword(input.email, input.password);
 
     const result = await this.authDataSource.login(input);
@@ -59,5 +64,28 @@ export class AuthServiceAPI {
 
     const result = await this.authDataSource.changePassword(input);
     return result ?? false;
+  }
+
+  async logout(accessToken: string | null): Promise<{ success: boolean }> {
+    if (!accessToken) {
+      throw new GraphQLError('Not authenticated', {
+        extensions: { code: 'UNAUTHORIZED' },
+      });
+    }
+
+    let payload: TokenPayload;
+    try {
+      payload = jwt.verify(accessToken, this.jwtSecret) as TokenPayload;
+    } catch (error) {
+      throw new GraphQLError('Invalid token', {
+        extensions: { code: 'UNAUTHORIZED' },
+      });
+    }
+
+    // Here we use the KV storage API from the auth data source to increment the token version,
+    // thereby invalidating all tokens issued before this logout.
+    await this.kvStorageAPI.incrementTokenVersion(payload.email);
+
+    return { success: true };
   }
 }

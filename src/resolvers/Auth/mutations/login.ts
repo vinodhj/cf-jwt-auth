@@ -1,10 +1,10 @@
 import { LoginInput } from 'generated';
 import { GraphQLError } from 'graphql';
-import { ApiType } from '@src/handlers/graphql';
+import { APIs } from '@src/services';
 
-export const login = async (_: unknown, { input }: { input: LoginInput }, { api }: { api: ApiType }) => {
+export const login = async (_: unknown, { input }: { input: LoginInput }, { apis: { authAPI } }: { apis: APIs }) => {
   try {
-    return await api.authAPI.login(input);
+    return await authAPI.login(input);
   } catch (error) {
     if (error instanceof GraphQLError || error instanceof Error) {
       // Re-throw GraphQL-specific errors

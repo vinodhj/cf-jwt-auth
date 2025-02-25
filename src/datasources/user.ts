@@ -3,12 +3,12 @@ import { DeleteUserInput, EditUserInput, UserByEmailInput, UserByFieldInput } fr
 import { eq, like } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { Role, user } from 'db/schema/user';
-import { SessionUserType } from '.';
+import { SessionUserType } from '@src/services';
 
 export class UserDataSource {
   private readonly db: DrizzleD1Database;
   private readonly kv: KVNamespace;
-  private readonly sessionUser: SessionUserType | null;
+  private readonly sessionUser: SessionUserType;
 
   constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser?: SessionUserType }) {
     this.db = db;

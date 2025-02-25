@@ -1,14 +1,14 @@
+import { APIs } from '@src/services';
 import { ChangePasswordInput } from 'generated';
 import { GraphQLError } from 'graphql';
-import { ApiType } from '@src/handlers/graphql';
 
 export const changePassword = async (
   _: unknown,
   { input }: { input: ChangePasswordInput },
-  { api, accessToken }: { api: ApiType; accessToken: string | null }
+  { apis: { authAPI }, accessToken }: { apis: APIs; accessToken: string | null }
 ): Promise<boolean> => {
   try {
-    return await api.authAPI.changePassword(input, accessToken);
+    return await authAPI.changePassword(input, accessToken);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

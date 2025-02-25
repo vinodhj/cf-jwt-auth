@@ -1,44 +1,14 @@
-import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
-import { Role } from 'db/schema/user';
-import { ColumnName, UserByFieldInput } from 'generated';
+import { APIs } from '@src/services';
+import { UserByFieldInput } from 'generated';
 import { GraphQLError } from 'graphql';
-import { validateUserAccess } from '../mutations/helper/userAccessValidators';
 
-export const userByfield = (
+export const userByfield = async (
   _: unknown,
   { input }: { input: UserByFieldInput },
-  {
-    datasources: { cfJwtAuthDataSource },
-    accessToken,
-    sessionUser,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
+  { apis: { userAPI }, accessToken }: { apis: APIs; accessToken: string | null }
 ) => {
   try {
-    if (input.field === ColumnName.Id || input.field === ColumnName.Email) {
-      validateUserAccess(accessToken, sessionUser, { [input.field]: input.value });
-    } else {
-      validateUserAccess(accessToken, sessionUser, {});
-    }
-
-    let value = input.value;
-    if (input.field === ColumnName.Role) {
-      const validRoles = ['ADMIN', 'USER'];
-      if (!validRoles.includes(input.value.toUpperCase())) {
-        throw new GraphQLError('Invalid role value', {
-          extensions: {
-            code: 'INPUT_INVALID_ROLE',
-          },
-        });
-      }
-      value = input.value.toUpperCase() === 'ADMIN' ? Role.Admin : Role.User;
-    } else if (input.field === ColumnName.Name) {
-      // Concatenate a wildcard % with the user_id
-      value = `${input.value}%`;
-    }
-    return cfJwtAuthDataSource.getUserAPI().userByfield({
-      field: input.field,
-      value,
-    });
+    return await userAPI.userByField(input, accessToken);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

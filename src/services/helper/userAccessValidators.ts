@@ -1,6 +1,6 @@
-import { SessionUserType } from '@src/datasources';
 import { Role } from 'db/schema/user';
 import { GraphQLError } from 'graphql';
+import { SessionUserType } from '..';
 
 export interface TargetIdentifier {
   id?: string;

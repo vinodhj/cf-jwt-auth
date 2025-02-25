@@ -1,21 +1,14 @@
-import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
 import { EditUserInput } from 'generated';
 import { GraphQLError } from 'graphql';
-import { validateUserAccess } from './helper/userAccessValidators';
+import { APIs } from '@src/services';
 
 export const editUser = async (
   _: unknown,
   { input }: { input: EditUserInput },
-  {
-    datasources: { cfJwtAuthDataSource },
-    accessToken,
-    sessionUser,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
+  { apis: { userAPI }, accessToken }: { apis: APIs; accessToken: string | null }
 ) => {
   try {
-    validateUserAccess(accessToken, sessionUser, { id: input.id });
-    // edit user
-    return await cfJwtAuthDataSource.getUserAPI().editUser(input);
+    return await userAPI.editUser(input, accessToken);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

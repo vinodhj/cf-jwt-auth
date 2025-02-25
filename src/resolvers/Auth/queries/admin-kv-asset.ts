@@ -1,22 +1,14 @@
-import { CfJwtAuthDataSource } from '@src/datasources';
+import { APIs } from '@src/services';
 import { QueryAdminKvAssetArgs } from 'generated';
 import { GraphQLError } from 'graphql';
 
-export const adminKvAsset = (
+export const adminKvAsset = async (
   _: unknown,
   { input }: QueryAdminKvAssetArgs,
-  {
-    datasources: { cfJwtAuthDataSource },
-    accessToken,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null }
+  { apis: { kvStorageAPI }, accessToken }: { apis: APIs; accessToken: string | null }
 ) => {
   try {
-    if (!accessToken) {
-      throw new GraphQLError('Not authenticated', {
-        extensions: { code: 'UNAUTHORIZED' },
-      });
-    }
-    return cfJwtAuthDataSource.getKvStorageAPI().adminKvAsset(input);
+    return await kvStorageAPI.adminKvAsset(input, accessToken);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors
