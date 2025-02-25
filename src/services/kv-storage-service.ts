@@ -1,4 +1,4 @@
-import { KvStorageDataSource } from '@src/datasources/cloudflare-kv-storage';
+import { KvStorageDataSource } from '@src/datasources/kv-storage';
 import { AdminKvAsset, AdminKvAssetInput } from 'generated';
 import { GraphQLError } from 'graphql';
 
