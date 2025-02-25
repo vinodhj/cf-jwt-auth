@@ -5,7 +5,7 @@ import { UserServiceAPI } from './user-service';
 import { DrizzleD1Database } from 'drizzle-orm/d1';
 import { Env } from '@src/index';
 import { KvStorageServiceAPI } from './kv-storage-service';
-import { KvStorageDataSource } from '@src/datasources/kv-storage';
+import { KvStorageDataSource } from '@src/datasources/Kv-storage';
 import { Role } from 'db/schema/user';
 
 export type SessionUserType = {
