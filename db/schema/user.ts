@@ -1,8 +1,8 @@
 import { text, integer, sqliteTable } from 'drizzle-orm/sqlite-core';
 
 export enum Role {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
+  Admin = 'ADMIN',
+  User = 'USER',
 }
 
 export const user = sqliteTable('user', {

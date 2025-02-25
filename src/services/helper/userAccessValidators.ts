@@ -1,6 +1,6 @@
-import { SessionUserType } from '@src/datasources';
 import { Role } from 'db/schema/user';
 import { GraphQLError } from 'graphql';
+import { SessionUserType } from '..';
 
 export interface TargetIdentifier {
   id?: string;
@@ -27,7 +27,7 @@ export const validateUserAccess = (accessToken: string | null, sessionUser: Sess
   const isSameUser = (target.id && sessionUser.id === target.id) || (target.email && sessionUser.email === target.email);
 
   // Allow if the user is editing their own record or is an admin.
-  if (isSameUser || sessionUser.role === Role.ADMIN) {
+  if (isSameUser || sessionUser.role === Role.Admin) {
     return;
   }
 

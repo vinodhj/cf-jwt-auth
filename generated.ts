@@ -115,7 +115,7 @@ export type Query = {
 };
 
 export type QueryAdminKvAssetArgs = {
-  input?: InputMaybe<AdminKvAssetInput>;
+  input: AdminKvAssetInput;
 };
 
 export type QueryUserByEmailArgs = {
@@ -123,7 +123,7 @@ export type QueryUserByEmailArgs = {
 };
 
 export type QueryUserByfieldArgs = {
-  input?: InputMaybe<UserByFieldInput>;
+  input: UserByFieldInput;
 };
 
 export enum Role {
@@ -358,9 +358,14 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  adminKvAsset?: Resolver<Maybe<ResolversTypes['AdminKvAsset']>, ParentType, ContextType, Partial<QueryAdminKvAssetArgs>>;
+  adminKvAsset?: Resolver<Maybe<ResolversTypes['AdminKvAsset']>, ParentType, ContextType, RequireFields<QueryAdminKvAssetArgs, 'input'>>;
   userByEmail?: Resolver<Maybe<ResolversTypes['UserResponse']>, ParentType, ContextType, RequireFields<QueryUserByEmailArgs, 'input'>>;
-  userByfield?: Resolver<Maybe<Array<Maybe<ResolversTypes['UserResponse']>>>, ParentType, ContextType, Partial<QueryUserByfieldArgs>>;
+  userByfield?: Resolver<
+    Maybe<Array<Maybe<ResolversTypes['UserResponse']>>>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryUserByfieldArgs, 'input'>
+  >;
   users?: Resolver<Maybe<Array<Maybe<ResolversTypes['UserResponse']>>>, ParentType, ContextType>;
 };
 

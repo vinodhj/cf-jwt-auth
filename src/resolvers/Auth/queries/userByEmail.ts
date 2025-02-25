@@ -1,20 +1,14 @@
-import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
+import { APIs } from '@src/services';
 import { UserByEmailInput } from 'generated';
 import { GraphQLError } from 'graphql';
-import { validateUserAccess } from '../mutations/helper/userAccessValidators';
 
-export const userByEmail = (
+export const userByEmail = async (
   _: unknown,
   { input }: { input: UserByEmailInput },
-  {
-    datasources,
-    accessToken,
-    sessionUser,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
+  { apis: { userAPI }, accessToken }: { apis: APIs; accessToken: string | null }
 ) => {
   try {
-    validateUserAccess(accessToken, sessionUser, { email: input.email });
-    return datasources.cfJwtAuthDataSource.userByEmail(input);
+    return await userAPI.userByEmail(input, accessToken);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

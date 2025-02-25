@@ -5,7 +5,7 @@ import { editUser } from './edit-user';
 import { changePassword } from './change-password';
 import { logout } from './logout';
 
-export const Mutation = {
+export const AuthMutation = {
   signUp,
   login,
   deleteUser,

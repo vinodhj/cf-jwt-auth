@@ -1,25 +1,14 @@
-import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
+import { APIs } from '@src/services';
 import { ChangePasswordInput } from 'generated';
 import { GraphQLError } from 'graphql';
-import { changePasswordValidators } from './helper/changePasswordValidators';
-import { validateUserAccess } from './helper/userAccessValidators';
 
 export const changePassword = async (
   _: unknown,
   { input }: { input: ChangePasswordInput },
-  {
-    datasources,
-    accessToken,
-    sessionUser,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
-) => {
+  { apis: { authAPI }, accessToken }: { apis: APIs; accessToken: string | null }
+): Promise<boolean> => {
   try {
-    validateUserAccess(accessToken, sessionUser, { id: input.id });
-    // Validate inputs
-    changePasswordValidators(input.current_password, input.new_password, input.confirm_password);
-
-    // Change password
-    return await datasources.cfJwtAuthDataSource.changePassword(input);
+    return await authAPI.changePassword(input, accessToken);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

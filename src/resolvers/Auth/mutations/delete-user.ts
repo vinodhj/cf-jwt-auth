@@ -1,21 +1,20 @@
-import { CfJwtAuthDataSource, SessionUserType } from '@src/datasources';
+import { APIs } from '@src/services';
 import { DeleteUserInput } from 'generated';
 import { GraphQLError } from 'graphql';
-import { validateUserAccess } from './helper/userAccessValidators';
 
 export const deleteUser = async (
   _: unknown,
   { input }: { input: DeleteUserInput },
   {
-    datasources,
+    apis: { userAPI },
     accessToken,
-    sessionUser,
-  }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; accessToken: string | null; sessionUser: SessionUserType }
+  }: {
+    apis: APIs;
+    accessToken: string | null;
+  }
 ) => {
   try {
-    validateUserAccess(accessToken, sessionUser, { id: input.id });
-    // Delete user
-    return await datasources.cfJwtAuthDataSource.deleteUser(input);
+    return await userAPI.deleteUser(input, accessToken);
   } catch (error) {
     if (error instanceof GraphQLError) {
       // Re-throw GraphQL-specific errors

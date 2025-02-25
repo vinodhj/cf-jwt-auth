@@ -1,35 +1,10 @@
-import { CfJwtAuthDataSource } from '@src/datasources';
 import { LoginInput } from 'generated';
-import { validateInputs } from './helper/authValidators';
-import { generateToken, TokenPayload } from './helper/jwtUtils';
 import { GraphQLError } from 'graphql';
+import { APIs } from '@src/services';
 
-export const login = async (
-  _: unknown,
-  { input }: { input: LoginInput },
-  { datasources, jwtSecret }: { datasources: { cfJwtAuthDataSource: CfJwtAuthDataSource }; jwtSecret: string }
-) => {
+export const login = async (_: unknown, { input }: { input: LoginInput }, { apis: { authAPI } }: { apis: APIs }) => {
   try {
-    // Validate inputs
-    validateInputs(input.email, input.password);
-
-    // Login user
-    const result = await datasources.cfJwtAuthDataSource.login(input);
-
-    const tokenPayload: TokenPayload = {
-      id: result.user.id,
-      email: result.user.email,
-      name: result.user.name,
-      role: result.user.role,
-      tokenVersion: result.token_version,
-    };
-
-    // Generate JWT token
-    const token = generateToken(tokenPayload, jwtSecret, '8h');
-    return {
-      token,
-      ...result,
-    };
+    return await authAPI.login(input);
   } catch (error) {
     if (error instanceof GraphQLError || error instanceof Error) {
       // Re-throw GraphQL-specific errors

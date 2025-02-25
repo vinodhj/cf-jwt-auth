@@ -113,9 +113,9 @@ export const typeDefs = gql`
 
   type Query {
     userByEmail(input: UserByEmailInput!): UserResponse
-    userByfield(input: UserByFieldInput): [UserResponse]
+    userByfield(input: UserByFieldInput!): [UserResponse]
     users: [UserResponse]
-    adminKvAsset(input: AdminKvAssetInput): AdminKvAsset
+    adminKvAsset(input: AdminKvAssetInput!): AdminKvAsset
   }
 
   type Mutation {
