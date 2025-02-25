@@ -4,8 +4,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "clean": "rm -rf ./node_modules",
     "deploy": "wrangler deploy",
-    "dev": "wrangler dev --name cf-jwt-auth --port 7787 --inspector-port 7329  --persist-to=.db-local",
+    "dev": "(kill -9 $(lsof -t -i:7787) || true) && wrangler dev --name cf-jwt-auth --port 7787 --inspector-port 7329  --persist-to=.db-local",
     "deploy:staging": "wrangler deploy --env staging",
     "start": "wrangler dev",
     "test": "vitest",
