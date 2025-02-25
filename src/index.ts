@@ -1,5 +1,6 @@
 import handleKVSync from './handlers/kv-sync';
 import handleGraphQL from './handlers/graphql';
+import { getCorsOrigin } from './cors-headers';
 
 export interface Env {
   DB: D1Database;
@@ -14,16 +15,16 @@ export default {
     const url = new URL(request.url);
 
     // ✅ Handle CORS Preflight Requests (OPTIONS)
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-          'Access-Control-Allow-Headers': 'Content-Type, X-Project-Token, Authorization',
-          'Access-Control-Allow-Credentials': 'true',
-        },
-      });
+    if (request.method.toUpperCase() === 'OPTIONS') {
+      const corsOrigin = getCorsOrigin(request);
+      console.log('Handling OPTIONS for origin:', corsOrigin);
+      const headers = new Headers();
+      headers.set('Access-Control-Allow-Origin', corsOrigin);
+      headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+      headers.set('Access-Control-Allow-Headers', 'Content-Type, X-Project-Token, Authorization');
+      headers.set('Access-Control-Allow-Credentials', 'true');
+      headers.set('Access-Control-Max-Age', '86400');
+      return new Response(null, { status: 204, headers });
     }
 
     // ✅ Handle GraphQL

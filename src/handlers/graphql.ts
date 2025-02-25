@@ -33,13 +33,7 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
   const db = drizzle(env.DB);
   const yoga = createYoga({
     schema: schema as YogaSchemaDefinition<object, YogaInitialContext>,
-    cors: {
-      // TODO: Allow only specific origins using environment variables
-      origin: '*',
-      methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
-      credentials: true,
-      allowedHeaders: ['Content-Type', 'X-Project-Token', 'x-project-token', 'Authorization', 'authorization'],
-    },
+    cors: false, // manually added CORS headers in addCORSHeaders
     landingPage: false,
     graphqlEndpoint: GRAPHQL_PATH,
     context: async () => {
@@ -89,5 +83,5 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
   });
   // ✅ Ensure CORS Headers Are Set on the Response
   const response = await yoga.fetch(request);
-  return addCORSHeaders(response);
+  return addCORSHeaders(request, response);
 }
