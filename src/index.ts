@@ -1,5 +1,6 @@
 import handleKVSync from './handlers/kv-sync';
 import handleGraphQL from './handlers/graphql';
+import { getCorsOrigin } from './cors-headers';
 
 export interface Env {
   DB: D1Database;
@@ -7,23 +8,28 @@ export interface Env {
   JWT_SECRET: string;
   PROJECT_TOKEN: string;
   KV_SYNC_TOKEN: string;
+  ALLOWED_ORIGINS: string;
 }
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
+    const allowedOrigins = env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',') : [];
     // ✅ Handle CORS Preflight Requests (OPTIONS)
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-          'Access-Control-Allow-Headers': 'Content-Type, X-Project-Token, Authorization',
-          'Access-Control-Allow-Credentials': 'true',
-        },
-      });
+    if (request.method.toUpperCase() === 'OPTIONS') {
+      const corsOrigin = getCorsOrigin(request, allowedOrigins);
+      const headers = new Headers();
+
+      if (corsOrigin) {
+        headers.set('Access-Control-Allow-Origin', corsOrigin);
+        headers.set('Access-Control-Allow-Credentials', 'true');
+      }
+
+      headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+      headers.set('Access-Control-Allow-Headers', 'Content-Type, X-Project-Token, Authorization');
+      headers.set('Access-Control-Max-Age', '86400');
+      return new Response(null, { status: 204, headers });
     }
 
     // ✅ Handle GraphQL
