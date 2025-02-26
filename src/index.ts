@@ -16,9 +16,11 @@ export default {
     const url = new URL(request.url);
 
     const allowedOrigins = env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',') : [];
+    console.log('allowedOrigins', allowedOrigins);
     // ✅ Handle CORS Preflight Requests (OPTIONS)
     if (request.method.toUpperCase() === 'OPTIONS') {
       const corsOrigin = getCorsOrigin(request, allowedOrigins);
+      console.log('corsOrigin', corsOrigin);
       const headers = new Headers();
 
       if (corsOrigin) {
