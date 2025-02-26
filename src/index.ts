@@ -28,7 +28,6 @@ export default {
 
       headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
       headers.set('Access-Control-Allow-Headers', 'Content-Type, X-Project-Token, Authorization');
-      headers.set('Access-Control-Max-Age', '86400');
       return new Response(null, { status: 204, headers });
     }
 

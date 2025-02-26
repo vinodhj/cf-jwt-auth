@@ -79,7 +79,7 @@ export class AuthServiceAPI {
 
     // Here we use the KV storage API from the auth data source to increment the token version,
     // thereby invalidating all tokens issued before this logout.
-    this.authDataSource.incrementTokenVersion(payload.email);
+    await this.authDataSource.incrementTokenVersion(payload.email);
 
     return { success: true };
   }
