@@ -15,12 +15,10 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    const allowedOrigins = env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',') : [];
-    console.log('allowedOrigins', allowedOrigins);
+    const allowedOrigins = env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()) : [];
     // ✅ Handle CORS Preflight Requests (OPTIONS)
     if (request.method.toUpperCase() === 'OPTIONS') {
       const corsOrigin = getCorsOrigin(request, allowedOrigins);
-      console.log('corsOrigin', corsOrigin);
       const headers = new Headers();
 
       if (corsOrigin) {
