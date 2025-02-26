@@ -9,10 +9,6 @@ export class KvStorageServiceAPI {
     this.kvDataSource = kvDataSource;
   }
 
-  async incrementTokenVersion(email: string): Promise<void> {
-    await this.kvDataSource.incrementTokenVersion(email);
-  }
-
   async adminKvAsset(input: AdminKvAssetInput, accessToken: string | null): Promise<AdminKvAsset> {
     if (!accessToken) {
       throw new GraphQLError('Not authenticated', {

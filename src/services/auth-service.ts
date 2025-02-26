@@ -6,28 +6,23 @@ import { validateUserAccess } from '@src/services/helper/userAccessValidators';
 import { changePasswordValidators } from '@src/services/helper/changePasswordValidators';
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
-import { KvStorageServiceAPI } from './kv-storage-service';
 import { SessionUserType } from '.';
 
 export class AuthServiceAPI {
   private readonly authDataSource: AuthDataSource;
-  private readonly kvStorageAPI: KvStorageServiceAPI;
   private readonly jwtSecret: string;
   private readonly sessionUser: SessionUserType;
 
   constructor({
     authDataSource,
-    kvStorageAPI,
     jwtSecret,
     sessionUser,
   }: {
     authDataSource: AuthDataSource;
-    kvStorageAPI: KvStorageServiceAPI;
     jwtSecret: string;
     sessionUser?: SessionUserType;
   }) {
     this.authDataSource = authDataSource;
-    this.kvStorageAPI = kvStorageAPI;
     this.jwtSecret = jwtSecret;
     this.sessionUser = sessionUser ?? null;
   }
@@ -84,7 +79,7 @@ export class AuthServiceAPI {
 
     // Here we use the KV storage API from the auth data source to increment the token version,
     // thereby invalidating all tokens issued before this logout.
-    await this.kvStorageAPI.incrementTokenVersion(payload.email);
+    this.authDataSource.incrementTokenVersion(payload.email);
 
     return { success: true };
   }

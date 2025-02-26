@@ -7,12 +7,10 @@ import { SessionUserType } from '@src/services';
 
 export class UserDataSource {
   private readonly db: DrizzleD1Database;
-  private readonly kv: KVNamespace;
   private readonly sessionUser: SessionUserType;
 
-  constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser?: SessionUserType }) {
+  constructor({ db, sessionUser }: { db: DrizzleD1Database; sessionUser?: SessionUserType }) {
     this.db = db;
-    this.kv = jwtKV;
     this.sessionUser = sessionUser ?? null;
   }
 

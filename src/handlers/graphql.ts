@@ -6,6 +6,7 @@ import { GraphQLError } from 'graphql';
 import { addCORSHeaders } from '@src/cors-headers';
 import { Env } from '@src/index';
 import { APIs, createAPIs, SessionUserType } from '@src/services';
+import { KvStorageDataSource } from '@src/datasources/kv-storage';
 
 export interface YogaInitialContext {
   jwtSecret: string;
@@ -45,9 +46,10 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
       let sessionUser = null;
 
       if (accessToken) {
+        const kvStorageDataSource = new KvStorageDataSource(env.KV_CF_JWT_AUTH);
         try {
           // TODO: jwt verify func should be called on every request, though it's expensive and performance optimizations may be needed.
-          const jwtVerifyToken = await verifyToken(accessToken, env.JWT_SECRET, env.KV_CF_JWT_AUTH);
+          const jwtVerifyToken = await verifyToken({ token: accessToken, secret: env.JWT_SECRET, kvStorage: kvStorageDataSource });
           sessionUser = {
             id: jwtVerifyToken.id,
             role: jwtVerifyToken.role,
