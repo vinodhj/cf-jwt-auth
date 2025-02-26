@@ -7,15 +7,24 @@ import { Role, user } from 'db/schema/user';
 import bcrypt from 'bcryptjs';
 import { handleError, validateCurrentPassword } from './utils';
 import { SessionUserType } from '@src/services';
+import { KvStorageDataSource } from './kv-storage';
 
 export class AuthDataSource {
   private readonly db: DrizzleD1Database;
-  private readonly kv: KVNamespace;
+  private readonly kvStorageDataSource: KvStorageDataSource;
   private readonly sessionUser: SessionUserType;
 
-  constructor({ db, jwtKV, sessionUser }: { db: DrizzleD1Database; jwtKV: KVNamespace; sessionUser?: SessionUserType }) {
+  constructor({
+    db,
+    kvStorageDataSource,
+    sessionUser,
+  }: {
+    db: DrizzleD1Database;
+    kvStorageDataSource: KvStorageDataSource;
+    sessionUser?: SessionUserType;
+  }) {
     this.db = db;
-    this.kv = jwtKV;
+    this.kvStorageDataSource = kvStorageDataSource;
     this.sessionUser = sessionUser ?? null;
   }
 
@@ -80,9 +89,8 @@ export class AuthDataSource {
         });
       }
 
-      // Fetch the current token version for this user (default to 0 if not set)
-      const currentVersionStr = await this.kv.get(`user:${input.email}:tokenVersion`);
-      const currentVersion = currentVersionStr ? parseInt(currentVersionStr) : 0;
+      // Retrieve token version via the dedicated KV storage datasource
+      const currentVersion = await this.kvStorageDataSource.getTokenVersion(input.email);
 
       const { password, ...userWithoutPassword } = result;
 
@@ -120,6 +128,14 @@ export class AuthDataSource {
       return await this.updatePassword(input.id, input.new_password);
     } catch (error) {
       handleError(error, 'Failed to change password');
+    }
+  }
+
+  async incrementTokenVersion(email: string): Promise<void> {
+    try {
+      await this.kvStorageDataSource.incrementTokenVersion(email);
+    } catch (error) {
+      handleError(error, 'Failed to increment token version');
     }
   }
 

@@ -1,3 +1,4 @@
+import { KvStorageDataSource } from '@src/datasources/kv-storage';
 import { Role } from 'db/schema/user';
 import { GraphQLError } from 'graphql';
 import jwt, { SignOptions } from 'jsonwebtoken';
@@ -26,14 +27,21 @@ export const generateToken = (payload: TokenPayload, secret: jwt.Secret, expires
   }
 };
 
-export const verifyToken = async (token: string, secret: string, kvNamespace: KVNamespace): Promise<TokenPayload> => {
+export const verifyToken = async ({
+  token,
+  secret,
+  kvStorage,
+}: {
+  token: string;
+  secret: string;
+  kvStorage: KvStorageDataSource;
+}): Promise<TokenPayload> => {
   try {
     const payload = jwt.verify(token, secret) as TokenPayload;
 
     // Retrieve the current token version from KV.
     // (We use the user's email as the key identifier; adjust if you have a different unique identifier.)
-    const storedVersionStr = await kvNamespace.get(`user:${payload.email}:tokenVersion`);
-    const storedVersion = storedVersionStr ? parseInt(storedVersionStr) : 0;
+    const storedVersion = await kvStorage.getTokenVersion(payload.email);
 
     if (payload.tokenVersion !== storedVersion) {
       throw new GraphQLError('For security reasons, your session is no longer valid. Please sign in again', {
@@ -56,7 +64,7 @@ export const verifyToken = async (token: string, secret: string, kvNamespace: KV
 
     try {
       // Expire the log after 7 days
-      await kvNamespace.put(logKey, logValue, { expirationTtl: 7 * 24 * 60 * 60 });
+      await kvStorage.storeLogAsset(logKey, logValue, { expirationTtl: 7 * 24 * 60 * 60 });
       // console.info('Invalid token log saved to KVNamespace:', logKey, logValue);
     } catch (kvError) {
       console.error('Error saving invalid token log to KVNamespace:', kvError);

@@ -36,11 +36,11 @@ export const createAPIs = ({ db, env, sessionUser }: APIParams): APIs => {
   const kvStorageAPI = new KvStorageServiceAPI(kvStorageDataSource);
 
   // Auth Service API
-  const authDataSource = new AuthDataSource({ db, jwtKV: env.KV_CF_JWT_AUTH, sessionUser });
-  const authAPI = new AuthServiceAPI({ authDataSource, kvStorageAPI, jwtSecret: env.JWT_SECRET, sessionUser });
+  const authDataSource = new AuthDataSource({ db, kvStorageDataSource, sessionUser });
+  const authAPI = new AuthServiceAPI({ authDataSource, jwtSecret: env.JWT_SECRET, sessionUser });
 
   // User Service API
-  const userDataSource = new UserDataSource({ db, jwtKV: env.KV_CF_JWT_AUTH, sessionUser });
+  const userDataSource = new UserDataSource({ db, sessionUser });
   const userAPI = new UserServiceAPI({ userDataSource, sessionUser });
 
   return { authAPI, userAPI, kvStorageAPI };

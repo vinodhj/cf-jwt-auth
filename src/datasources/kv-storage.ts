@@ -8,6 +8,16 @@ export class KvStorageDataSource {
     this.kv = kv;
   }
 
+  async storeLogAsset(key: string, value: string, options?: { expirationTtl: number }): Promise<void> {
+    await this.kv.put(key, value, options);
+  }
+
+  async getTokenVersion(email: string): Promise<number> {
+    // Fetch the current token version for this user (default to 0 if not set)
+    const currentVersionStr = await this.kv.get(`user:${email}:tokenVersion`);
+    return currentVersionStr ? parseInt(currentVersionStr) : 0;
+  }
+
   async incrementTokenVersion(email: string): Promise<boolean> {
     // Retrieve the current token version from KV using the user's email as the key.
     const currentVersionStr = await this.kv.get(`user:${email}:tokenVersion`);
