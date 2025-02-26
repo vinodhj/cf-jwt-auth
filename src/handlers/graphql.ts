@@ -83,5 +83,5 @@ export default async function handleGraphQL(request: Request, env: Env): Promise
   });
   // ✅ Ensure CORS Headers Are Set on the Response
   const response = await yoga.fetch(request);
-  return addCORSHeaders(request, response);
+  return addCORSHeaders(request, response, env);
 }
