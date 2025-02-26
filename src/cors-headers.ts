@@ -25,7 +25,6 @@ export const addCORSHeaders = (request: Request, response: Response, env: Env): 
   // Adding Vary header to ensure caching mechanisms differentiate responses by origin
   newHeaders.append('Vary', 'Origin');
 
-  console.log('Updated CORS headers:', Array.from(newHeaders.entries()));
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
