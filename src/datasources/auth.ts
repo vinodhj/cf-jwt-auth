@@ -84,7 +84,7 @@ export class AuthDataSource {
       if (!isPasswordMatch) {
         throw new GraphQLError('Invalid password', {
           extensions: {
-            code: 'UNAUTHORIZED',
+            code: 'BAD_USER_INPUT',
           },
         });
       }

@@ -19,7 +19,10 @@ export const addCORSHeaders = (request: Request, response: Response, env: Env): 
     newHeaders.set('Access-Control-Allow-Credentials', 'true');
   }
   newHeaders.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  newHeaders.set('Access-Control-Allow-Headers', 'Content-Type, X-Project-Token, Authorization');
+  newHeaders.set(
+    'Access-Control-Allow-Headers',
+    'Content-Type, X-Project-Token, Authorization, apollographql-client-name, apollographql-client-version'
+  );
 
   // Adding Vary header to ensure caching mechanisms differentiate responses by origin
   newHeaders.append('Vary', 'Origin');

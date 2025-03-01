@@ -6,7 +6,7 @@ export async function validateCurrentPassword(currentPassword: string, storedPas
   if (!isPasswordMatch) {
     throw new GraphQLError('Invalid current password', {
       extensions: {
-        code: 'UNAUTHORIZED',
+        code: 'BAD_USER_INPUT',
       },
     });
   }

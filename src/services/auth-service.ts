@@ -45,7 +45,7 @@ export class AuthServiceAPI {
       tokenVersion: result.token_version,
     };
 
-    const token = generateToken(tokenPayload, this.jwtSecret, '8h');
+    const token = generateToken(tokenPayload, this.jwtSecret, '1d');
     return {
       token,
       ...result,
@@ -64,7 +64,7 @@ export class AuthServiceAPI {
   async logout(accessToken: string | null): Promise<{ success: boolean }> {
     if (!accessToken) {
       throw new GraphQLError('Not authenticated', {
-        extensions: { code: 'UNAUTHORIZED' },
+        extensions: { code: 'TOKEN_NOT_FOUND' },
       });
     }
 
