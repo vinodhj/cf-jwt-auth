@@ -1,5 +1,10 @@
 import { Env } from '.';
 
+// Helper to escape regex special characters in a string
+const escapeRegExp = (str: string): string => {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 // Helper to determine the proper CORS origin based on the request
 // export const getCorsOrigin = (request: Request, allowedOrigins: string[]): string | null => {
 //   const requestOrigin = request.headers.get('Origin');
@@ -18,17 +23,13 @@ export const getCorsOrigin = (request: Request, allowedOrigins: string[]): strin
 
   for (const allowed of allowedOrigins) {
     // If no wildcard is present, do an exact match.
-    if (!allowed.includes('*')) {
+    if (allowed.indexOf('*') === -1) {
       if (allowed === requestOrigin) {
         return requestOrigin;
       }
     } else {
-      // Allowed origin contains a wildcard (e.g. "https://*.subdomain")
-      // Convert the allowed pattern into a regular expression.
-      const escaped = allowed.replace(/[-/\\^$+?.()|[\]{}]/g, '\\$&');
-      // Replace the escaped wildcard (\*) with a regex wildcard (.*)
-      const pattern = '^' + escaped.replace(/\\\*/g, '.*') + '$';
-      const regex = new RegExp(pattern, 'i'); // case-insensitive
+      const regexStr = '^' + allowed.split('*').map(escapeRegExp).join('.*') + '$';
+      const regex = new RegExp(regexStr, 'i'); // case-insensitive
       if (regex.test(requestOrigin)) {
         return requestOrigin;
       }
