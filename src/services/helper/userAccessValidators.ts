@@ -8,7 +8,6 @@ export interface TargetIdentifier {
 }
 
 export const validateUserAccess = (accessToken: string | null, sessionUser: SessionUserType, target: TargetIdentifier): void => {
-  console.log('validateUserAccess', sessionUser, target);
   if (!accessToken) {
     throw new GraphQLError('Unauthorized token', {
       extensions: {
