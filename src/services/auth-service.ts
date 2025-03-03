@@ -73,7 +73,7 @@ export class AuthServiceAPI {
       payload = jwt.verify(accessToken, this.jwtSecret) as TokenPayload;
     } catch (error) {
       throw new GraphQLError('Invalid token', {
-        extensions: { code: 'UNAUTHORIZED' },
+        extensions: { code: 'INVALID_TOKEN' },
       });
     }
 
