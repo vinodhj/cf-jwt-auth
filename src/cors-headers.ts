@@ -5,15 +5,6 @@ const escapeRegExp = (str: string): string => {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
-// Helper to determine the proper CORS origin based on the request
-// export const getCorsOrigin = (request: Request, allowedOrigins: string[]): string | null => {
-//   const requestOrigin = request.headers.get('Origin');
-//   if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
-//     return requestOrigin;
-//   }
-//   return null;
-// };
-
 // Helper to determine the proper CORS origin based on the request with subdomain matching
 export const getCorsOrigin = (request: Request, allowedOrigins: string[]): string | null => {
   const requestOrigin = request.headers.get('Origin');
